@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aurelis — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── DESIGN TOKENS ── */
+    :root {
+      --brand-primary:        #C63D2F;
+      --brand-primary-hover:  #B03527;
+      --brand-primary-active: #9E2E22;
+      --brand-secondary:      #3E7A54;
+      --brand-secondary-active: #2C5A3F;
+      --brand-accent:         #D9A441;
+
+      --background:       #F7F1E8;
+      --surface:          #EFE6D4;
+      --surface-elevated: #FDFAF5;
+      --surface-muted:    #EAE0CE;
+
+      --text-primary:   #1E1A17;
+      --text-secondary: #4A3F36;
+      --text-muted:     #7A6E64;
+      --text-disabled:  #B0A89E;
+      --text-inverse:   #FDFAF5;
+
+      --border:        #DDD4C0;
+      --border-subtle: #EAE0CE;
+      --border-strong: #C4B99E;
+
+      --success:        #2E6B45;
+      --success-bg:     rgba(46,107,69,0.08);
+      --success-border: rgba(46,107,69,0.25);
+      --warning:        #B8832A;
+      --warning-bg:     rgba(217,164,65,0.10);
+      --warning-border: rgba(217,164,65,0.30);
+      --danger:         #C63D2F;
+      --danger-bg:      rgba(198,61,47,0.08);
+      --danger-border:  rgba(198,61,47,0.25);
+
+      --shadow-xs: 0 1px 3px rgba(30,26,23,0.08);
+      --shadow-sm: 0 2px 8px rgba(30,26,23,0.08), 0 1px 3px rgba(30,26,23,0.05);
+      --shadow-md: 0 4px 16px rgba(30,26,23,0.10), 0 2px 6px rgba(30,26,23,0.06);
+      --shadow-lg: 0 8px 32px rgba(30,26,23,0.12), 0 4px 12px rgba(30,26,23,0.07);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 20px;
+
+      /* Legacy aliases — keep so any JS string refs to old vars still resolve */
+      --bg:      var(--background);
+      --card:    var(--surface-elevated);
+      --card2:   var(--surface-muted);
+      --accent:  var(--brand-primary);
+      --accent2: var(--brand-secondary);
+      --warn:    var(--brand-accent);
+      --text:    var(--text-primary);
+      --muted:   var(--text-muted);
+
+      --sidebar: 240px;
+    }
+
+    body.compact-sidebar { --sidebar: 170px; }
+    body.compact-sidebar .nav-item { font-size: 0.8rem; padding: 10px 14px; gap: 8px; }
+    body.compact-sidebar .sidebar-logo { font-size: 1.05rem; padding: 20px 16px 14px; }
+    body.compact-sidebar .nav-icon { font-size: 1rem; width: 18px; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--background); color: var(--text-primary);
+      min-height: 100vh; display: flex; overflow-x: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar); min-height: 100vh;
+      background: var(--surface-elevated);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 50; transition: transform 0.3s, width 0.2s;
+      box-shadow: 2px 0 12px rgba(30,26,23,0.04);
+    }
+    .sidebar-logo {
+      padding: 28px 22px 20px;
+      font-family: 'Fraunces', serif;
+      font-size: 1.35rem; font-weight: 800;
+      border-bottom: 1px solid var(--border-subtle);
+      letter-spacing: -0.4px;
+      color: var(--text-primary);
+      background: linear-gradient(180deg, var(--surface-elevated) 0%, var(--surface) 100%);
+    }
+    .sidebar-logo span { 
+      color: var(--brand-primary);
+      background: linear-gradient(135deg, var(--brand-primary), var(--danger));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .ta-mini {
+      padding: 18px 20px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface);
+    }
+    .avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', serif; font-weight: 800;
+      font-size: 0.88rem; color: #fff; flex-shrink: 0; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(198,61,47,0.2);
+      border: 2px solid var(--surface-elevated);
+    }
+    .ta-mini-info { overflow: hidden; }
+    .ta-mini-name {
+      font-size: 0.875rem; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+    .ta-mini-role {
+      font-size: 0.68rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1.2px; margin-top: 2px;
+      font-weight: 600;
+    }
+
+    nav.sidebar-nav { padding: 16px 12px; flex: 1; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; border-radius: var(--radius-md);
+      cursor: pointer; margin-bottom: 3px;
+      color: var(--text-muted); font-size: 0.875rem; font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none; letter-spacing: 0.01em;
+      position: relative;
+    }
+    .nav-item .nav-icon { 
+      display:inline-flex; align-items:center; justify-content:center; 
+      width: 20px; flex-shrink:0;
+      transition: transform 0.2s;
+    }
+    .nav-item .nav-icon svg { 
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .nav-item:hover {
+      background: var(--danger-bg);
+      color: var(--text-primary);
+      transform: translateX(2px);
+    }
+    .nav-item:hover .nav-icon svg { opacity: 1; }
+    .nav-item:hover .nav-icon { transform: scale(1.05); }
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(198,61,47,0.14), rgba(198,61,47,0.10));
+      color: var(--brand-primary); font-weight: 700;
+      box-shadow: 0 2px 6px rgba(198,61,47,0.15);
+      border: 1px solid var(--danger-border);
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
+      background: var(--brand-primary);
+      border-radius: 0 2px 2px 0;
+    }
+    .nav-item.active .nav-icon svg { opacity: 1; }
+    .nav-badge {
+      margin-left: auto;
+      background: linear-gradient(135deg, var(--brand-primary), var(--danger));
+      color: #fff; font-size: 0.68rem; font-weight: 800;
+      padding: 3px 8px; border-radius: 100px; min-width: 22px; text-align: center;
+      box-shadow: 0 2px 6px rgba(198,61,47,0.4);
+      animation: pulse-badge 2s infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .sidebar-bottom {
+      padding: 16px 12px;
+      border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--surface) 0%, var(--surface-muted) 100%);
+    }
+    .logout-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; border-radius: var(--radius-md);
+      cursor: pointer; color: var(--danger);
+      font-size: 0.875rem; font-weight: 600;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .logout-btn:hover { 
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      transform: translateX(2px);
+    }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar);
+      flex: 1; padding: 36px 40px;
+      min-height: 100vh;
+      transition: margin-left 0.2s;
+      background: var(--background);
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .page-title {
+      font-family: 'Fraunces', serif; font-size: 1.75rem; font-weight: 800;
+      letter-spacing: -0.7px; color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .page-sub { 
+      font-size: 0.875rem; 
+      color: var(--text-secondary); 
+      margin-top: 5px;
+      font-weight: 500;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .icon-btn {
+      width: 38px; height: 38px; border-radius: var(--radius-md);
+      background: var(--surface-elevated); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 0.95rem;
+      transition: all 0.2s;
+      box-shadow: var(--shadow-xs);
+    }
+    .icon-btn:hover { 
+      background: var(--surface); 
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    .icon-btn:active {
+      transform: translateY(0);
+    }
+
+    /* ── SECTIONS ── */
+    .section { display: none; animation: fadeIn 0.3s ease both; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── STAT CARDS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 22px 24px;
+      position: relative; overflow: hidden;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s;
+      cursor: default;
+    }
+    .stat-card:hover { 
+      transform: translateY(-3px); 
+      box-shadow: var(--shadow-lg);
+      border-color: var(--border-strong);
+    }
+    .stat-card::after {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      transition: height 0.3s;
+    }
+    .stat-card:hover::after {
+      height: 5px;
+    }
+    .stat-card.blue::after  { background: linear-gradient(90deg, var(--brand-primary), var(--danger)); }
+    .stat-card.green::after { background: linear-gradient(90deg, var(--brand-secondary), #2E6B45); }
+    .stat-card.warn::after  { background: linear-gradient(90deg, var(--brand-accent), var(--warning)); }
+    .stat-card.red::after   { background: linear-gradient(90deg, var(--danger), var(--brand-primary-active)); }
+    .stat-icon { 
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .stat-card.blue  .stat-icon { color: var(--brand-primary); }
+    .stat-card.green .stat-icon { color: var(--brand-secondary); }
+    .stat-card.warn  .stat-icon { color: var(--brand-accent); }
+    .stat-card.red   .stat-icon { color: var(--danger); }
+    .stat-num { 
+      font-family:'Fraunces',serif; 
+      font-size:2rem; 
+      font-weight:900; 
+      line-height:1; 
+      color: var(--text-primary);
+      letter-spacing: -0.03em;
+    }
+    .stat-lbl { 
+      font-size:0.78rem; 
+      color:var(--text-muted); 
+      margin-top:8px; 
+      font-weight: 600; 
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.3s, border-color 0.3s;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--border-strong);
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid var(--border-subtle);
+      background: linear-gradient(180deg, var(--surface-elevated) 0%, var(--surface) 100%);
+    }
+    .card-title {
+      font-family:'Fraunces',serif; font-size:1.05rem; font-weight:800;
+      color: var(--text-primary); letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .card-body { padding: 24px; }
+
+    /* ── LINK BOX ── */
+    .link-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px 18px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: var(--shadow-xs);
+      transition: all 0.2s;
+    }
+    .link-box:hover {
+      box-shadow: var(--shadow-sm);
+      border-color: var(--border-strong);
+    }
+    .link-url {
+      flex: 1; font-size: 0.85rem; color: var(--brand-primary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-family: monospace;
+      font-weight: 600;
+    }
+    .copy-btn {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--brand-primary); padding: 8px 16px; border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 0.8rem; font-weight: 700;
+      transition: all 0.2s; white-space: nowrap;
+      box-shadow: var(--shadow-xs);
+    }
+    .copy-btn:hover { 
+      background: rgba(198,61,47,0.18);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── PREVIEW CARD ── */
+    .preview-card {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-elevated) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 28px;
+      text-align: center; margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .preview-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary), var(--brand-accent));
+    }
+    .preview-card .p-label {
+      font-size:0.7rem; color:var(--text-muted);
+      text-transform:uppercase; letter-spacing:2.2px; margin-bottom:12px; font-weight: 700;
+    }
+    .preview-card h2 { 
+      font-family:'Fraunces',serif; 
+      font-size:1.4rem; 
+      font-weight:900; 
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+    .preview-card .p-meta { 
+      font-size:0.875rem; 
+      color:var(--text-muted); 
+      margin-top:8px;
+      font-weight: 500;
+    }
+    .preview-card .p-meta strong { 
+      color:var(--brand-secondary);
+      font-weight: 700;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: var(--radius-md);
+      font-family:'Plus Jakarta Sans',sans-serif; font-size:0.875rem; font-weight:700;
+      cursor: pointer; border: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    .btn:hover { 
+      transform:translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30,26,23,0.15);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
+      color:#fff;
+      box-shadow: 0 4px 0 var(--brand-primary-active), 0 4px 8px rgba(198,61,47,0.3);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 4px 0 var(--brand-primary-active), 0 6px 16px rgba(198,61,47,0.4);
+    }
+    .btn-success {
+      background: linear-gradient(135deg, var(--brand-secondary), #2E6B45);
+      color:#fff;
+      box-shadow: 0 4px 0 var(--brand-secondary-active), 0 4px 8px rgba(62,122,84,0.3);
+    }
+    .btn-success:hover {
+      box-shadow: 0 4px 0 var(--brand-secondary-active), 0 6px 16px rgba(62,122,84,0.4);
+    }
+    .btn-danger {
+      background: var(--danger-bg); color:var(--danger);
+      border:1px solid var(--danger-border);
+    }
+    .btn-danger:hover {
+      background: rgba(198,61,47,0.12);
+      border-color: var(--danger);
+    }
+    .btn-ghost {
+      background: var(--surface-muted); color:var(--text-primary);
+      border:1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      background: var(--surface);
+      border-color: var(--border-strong);
+    }
+    .btn-sm { 
+      padding: 7px 15px; 
+      font-size: 0.8rem; 
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+    }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    .gradebook-card { overflow: visible; }
+    .gradebook-card .table-wrap { max-height: 65vh; overflow-y: auto; }
+    table { width:100%; border-collapse:collapse; }
+    #marks-table {
+      table-layout: fixed; width: 100%;
+      border-collapse: separate; border-spacing: 0;
+    }
+    #marks-table th, #marks-table td {
+      border-bottom: 1px solid var(--border-subtle);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    #marks-table thead th {
+      position: sticky; top: 0; z-index: 4;
+      background: var(--surface-elevated);
+    }
+    #marks-table th:nth-child(1), #marks-table td:nth-child(1) { width: 15%; }
+    #marks-table th:nth-child(2), #marks-table td:nth-child(2) { width: 10%; }
+    #marks-table .marks-input { width: 100%; max-width: 60px; font-size: 0.8rem; padding: 6px 4px; text-align: center; }
+    #marks-table th { font-size: 0.68rem; padding: 10px 8px; }
+    #marks-table td { padding: 10px 8px; }
+    th {
+      text-align:left; font-size:0.72rem; text-transform:uppercase;
+      letter-spacing:1.8px; color:var(--text-muted); font-weight:800;
+      padding:13px 20px; background:var(--surface);
+      border-bottom:2px solid var(--border);
+    }
+    td {
+      padding:14px 20px; font-size:0.875rem;
+      border-bottom:1px solid var(--border-subtle);
+      vertical-align:middle; color: var(--text-primary);
+      font-weight: 500;
+    }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { 
+      background: rgba(198,61,47,0.03);
+      transition: background 0.15s;
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display:inline-block; padding:4px 11px; border-radius:100px;
+      font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px;
+      box-shadow: 0 1px 3px rgba(30,26,23,0.1);
+    }
+    .badge-pending {
+      background: var(--warning-bg); color:var(--warning);
+      border:1px solid var(--warning-border);
+    }
+    .badge-approved {
+      background: var(--success-bg); color:var(--success);
+      border:1px solid var(--success-border);
+    }
+    .badge-rejected {
+      background: var(--danger-bg); color:var(--danger);
+      border:1px solid var(--danger-border);
+    }
+
+    .action-btns { display:flex; gap:7px; }
+
+    /* ── MARKS INPUT ── */
+    .marks-input {
+      width:80px; background:var(--surface);
+      border:1px solid var(--border); border-radius:var(--radius-sm);
+      padding:7px 10px; color:var(--text-primary);
+      font-family:'Plus Jakarta Sans',sans-serif; font-size:0.875rem;
+      text-align:center; outline:none;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+    .marks-input:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-elevated);
+    }
+    .marks-input:focus {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px var(--danger-bg);
+      background: var(--surface-elevated);
+      transform: scale(1.03);
+    }
+
+    /* ── PROFILE FORM ── */
+    .profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .form-field { margin-bottom:16px; }
+    .form-field label {
+      display:block; font-size:0.78rem; color:var(--text-secondary);
+      margin-bottom:7px; font-weight:700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .form-input {
+      width:100%; background:var(--surface);
+      border:1px solid var(--border); border-radius:var(--radius-md);
+      padding:12px 16px; color:var(--text-primary);
+      font-family:'Plus Jakarta Sans',sans-serif; font-size:0.9rem;
+      outline:none; transition: all 0.2s;
+      font-weight: 500;
+    }
+    .form-input:hover {
+      border-color: var(--border-strong);
+    }
+    .form-input:focus {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px var(--danger-bg);
+      background: var(--surface-elevated);
+      transform: translateY(-1px);
+    }
+    .form-input:read-only { 
+      opacity:0.6; 
+      cursor:not-allowed;
+      background: var(--surface-muted);
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position:fixed; bottom:28px; right:28px;
+      background:var(--surface-elevated); border:1px solid var(--border-strong);
+      border-radius:var(--radius-lg); padding:15px 22px;
+      font-size:0.9rem; z-index:999;
+      display:flex; align-items:center; gap:12px;
+      transform:translateY(100px); opacity:0;
+      transition:transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s;
+      box-shadow: var(--shadow-lg);
+      font-weight: 600;
+      border-left: 4px solid var(--brand-primary);
+    }
+    .toast.show { transform:translateY(0); opacity:1; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { 
+      text-align:center; 
+      padding:50px 20px; 
+      color:var(--text-muted);
+    }
+    .empty-state .empty-icon { 
+      display:flex; 
+      justify-content:center; 
+      margin-bottom:16px;
+      opacity: 0.5;
+    }
+    .empty-state p { 
+      font-size:0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+
+    /* ── MOBILE ── */
+    .mob-toggle { display:none; }
+    @media(max-width:900px) {
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.open { transform:translateX(0); }
+      .main { margin-left:0; padding:20px; }
+      .stats-row { grid-template-columns:1fr 1fr; }
+      .mob-toggle { display:flex; }
+      .profile-grid { grid-template-columns:1fr; }
+
+      #marks-table { table-layout: auto; width: max-content; min-width: 100%; }
+      #marks-table th, #marks-table td { white-space: nowrap; }
+      #marks-table th:nth-child(1), #marks-table td:nth-child(1) { width: auto; }
+      #marks-table th:nth-child(2), #marks-table td:nth-child(2) { width: auto; }
+      #marks-table th:nth-child(1), #marks-table td:nth-child(1),
+      #marks-table th:nth-child(2), #marks-table td:nth-child(2) {
+        position: sticky; background: var(--surface-elevated); overflow: visible; text-overflow: clip;
+      }
+      #marks-table th:nth-child(1), #marks-table td:nth-child(1) { left: 0;     min-width: 100px; }
+      #marks-table th:nth-child(2), #marks-table td:nth-child(2) { left: 100px; min-width: 70px; box-shadow: 2px 0 4px rgba(30,26,23,0.10); }
+      #marks-table thead th:nth-child(1), #marks-table thead th:nth-child(2) { z-index: 6; }
+      #marks-table th:nth-child(1), #marks-table td:nth-child(1),
+      #marks-table th:nth-child(2), #marks-table td:nth-child(2) { z-index: 2; }
+      #marks-table th:not(:nth-child(1)):not(:nth-child(2)),
+      #marks-table td:not(:nth-child(1)):not(:nth-child(2)) { min-width: 80px; }
+      #marks-table .marks-input { max-width: 70px; font-size: 0.9rem; padding: 8px 4px; }
+    }
+    @media(max-width:500px) {
+      .stats-row { grid-template-columns:1fr 1fr; gap:10px; }
+    }
+
+    /* ── OVERLAY ── */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(30,26,23,0.45); z-index:40; }
+    .overlay.show { display:block; }
+
+    /* ── SYNC INDICATOR ── */
+    .sync-dot {
+      width:7px; height:7px; border-radius:50%;
+      background:var(--brand-secondary); display:inline-block;
+      margin-right:6px; animation:pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+    /* ── CATEGORY PILL (class switcher pills) ── */
+    .side-list-item {
+      display: inline-block; text-align: left;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary); font-size: 0.78rem;
+      padding: 6px 14px; border-radius: 100px;
+      cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
+      font-weight: 600;
+      box-shadow: var(--shadow-xs);
+    }
+    .side-list-item:hover {
+      background: var(--surface-muted);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    .side-list-item.active-pill {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
+      border-color: var(--brand-primary); 
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(198,61,47,0.3);
+      font-weight: 700;
+    }
+
+    /* ── COLUMN HIGHLIGHT ── */
+    .col-highlight {
+      background: rgba(217,164,65,0.22) !important;
+      transition: background 0.3s;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">Aure<span>lis</span></div>
+
+  <div class="ta-mini">
+    <div class="avatar" id="sb-avatar">A</div>
+    <div class="ta-mini-info">
+      <div class="ta-mini-name" id="sb-name">Loading...</div>
+      <div class="ta-mini-role">Teaching Assistant</div>
+    </div>
+  </div>
+
+  <div style="padding:16px 18px;border-bottom:1px solid var(--border-subtle);background:var(--surface);">
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin-bottom:9px;font-weight:700;">Active Class</div>
+    <select id="class-switcher" onchange="switchClass(this.value)" style="width:100%;background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;color:var(--text-primary);font-family:'Plus Jakarta Sans',sans-serif;font-size:0.85rem;margin-bottom:10px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:var(--shadow-xs);" onmouseover="this.style.borderColor='var(--border-strong)'" onmouseout="this.style.borderColor='var(--border)'"></select>
+    <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;" onclick="addNewClass()">➕ New Class</button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-item active" onclick="showSection('overview')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Overview
+    </div>
+    <div class="nav-item" onclick="showSection('link')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> Class Link
+    </div>
+    <div class="nav-item" onclick="showSection('students')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Students
+      <span class="nav-badge" id="pending-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-item" onclick="showSection('marks')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Marks
+    </div>
+    <div class="nav-item" onclick="showSection('queries')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> Queries
+      <span class="nav-badge" id="queries-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-item" onclick="showSection('profile')">
+      <span class="nav-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> My Profile
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="logout-btn" onclick="handleLogout()">
+      <span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span> Logout
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);text-align:center;margin-top:10px;line-height:1.6;">
+      Need help?<br/>
+      📧 <a href="mailto:muhammed.abdullah.coder@gmail.com" style="color:var(--brand-primary);text-decoration:none;">Email</a>
+      &nbsp;·&nbsp;
+      💬 <a href="https://wa.me/923226334814" target="_blank" style="color:var(--brand-primary);text-decoration:none;">WhatsApp</a>
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="page-title">Overview</div>
+      <div class="page-sub"  id="page-sub">Welcome back 👋</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn mob-toggle" onclick="openSidebar()">☰</div>
+      <div class="icon-btn" title="Refresh" onclick="loadAll()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;margin-right:0;"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+    </div>
+  </div>
+
+  <!-- ══════════════ OVERVIEW ══════════════ -->
+  <div class="section active" id="sec-overview">
+    <div class="stats-row">
+      <div class="stat-card blue">
+        <div class="stat-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="stat-num" id="ov-total">—</div>
+        <div class="stat-lbl">Total Students</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="stat-num" id="ov-approved">—</div>
+        <div class="stat-lbl">Approved</div>
+      </div>
+      <div class="stat-card warn">
+        <div class="stat-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="stat-num" id="ov-pending">—</div>
+        <div class="stat-lbl">Pending Approval</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="stat-num" id="ov-marks">—</div>
+        <div class="stat-lbl">Marks Entered</div>
+      </div>
+    </div>
+
+    <!-- Class Link Quick View -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Your Class Invite Link</span>
+        <button class="btn btn-ghost btn-sm" onclick="showSection('link')">Manage →</button>
+      </div>
+      <div class="card-body">
+        <div id="ov-link-box">
+        <p style="color:var(--text-muted);font-size:0.88rem;">No link generated yet. Go to <strong>Class Link</strong> to create one.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Students -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Recent Student Requests</span>
+        <button class="btn btn-ghost btn-sm" onclick="showSection('students')">View All →</button>
+      </div>
+      <div class="card-body" id="ov-recent-students">
+        <div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><p>No students yet.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ CLASS LINK ══════════════ -->
+  <div class="section" id="sec-link">
+
+    <!-- What students will see preview -->
+    <div class="preview-card">
+      <div class="p-label">Students will see this when they open your link</div>
+      <h2 id="prev-ta-name">Your Name</h2>
+      <div class="p-meta">
+        Teaching Assistant &nbsp;·&nbsp; <strong id="prev-course">Your Course</strong>
+      </div>
+      <div class="p-meta" style="margin-top:4px">
+        Under <strong id="prev-sir">Sir's Name</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Class Details</span></div>
+      <div class="card-body">
+        <div class="profile-grid">
+          <div class="form-field">
+            <label>Class / Course Name</label>
+            <input class="form-input" id="c-name" placeholder="e.g. Data Structures — Section A"/>
+          </div>
+          <div class="form-field">
+            <label>Sir's Name</label>
+            <input class="form-input" id="c-sir-name" placeholder="Teacher's name"/>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveClassDetails()">💾 Save Class Details</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12.5V17c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/></svg>Teacher View Link</span></div>
+      <div class="card-body">
+        <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">Share this read-only link with your Sir — they can see class progress and top/bottom performers without logging in or editing anything.</p>
+        <div id="teacher-link-display">
+          <button class="btn btn-ghost btn-sm" onclick="generateTeacherLink()">⚡ Generate Teacher Link</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Class Invite Link</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="generateLink()">⚡ Generate New Link</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="link-display">
+        <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:16px;">Generate a link and share it with your students. They will register through this link.</p>
+        </div>
+
+        <div style="margin-top:16px;padding:16px;background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);">
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:10px;font-weight:600;">📋 HOW TO SHARE</p>
+          <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.7;">
+            1. Click <strong style="color:var(--text-primary)">Generate New Link</strong> above<br/>
+            2. Copy the link and share via WhatsApp, email, or LMS<br/>
+            3. Students open link → see your info → enter their Roll No. & name<br/>
+            4. Come to <strong style="color:var(--text)">Students</strong> tab to approve them
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ STUDENTS ══════════════ -->
+  <div class="section" id="sec-students">
+
+    <!-- Add Student -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button class="btn btn-primary btn-sm" onclick="toggleAddStudentForm()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Student</button>
+    </div>
+    <div class="card" id="add-student-card" style="display:none;margin-bottom:20px;">
+      <div class="card-header"><span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Student Manually</span></div>
+      <div class="card-body">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;">
+          <div class="form-field" style="margin:0;flex:1;min-width:160px;">
+            <label style="font-size:0.78rem;color:var(--text-muted);">Full Name</label>
+            <input class="form-input" id="add-student-name" placeholder="e.g. ...."/>
+          </div>
+          <div class="form-field" style="margin:0;width:140px;">
+            <label style="font-size:0.78rem;color:var(--text-muted);">Roll Number</label>
+            <input class="form-input" id="add-student-roll" placeholder="e.g. 25F-XXXX"/>
+          </div>
+          <div class="form-field" style="margin:0;flex:1;min-width:160px;">
+            <label style="font-size:0.78rem;color:var(--text-muted);">Email (optional)</label>
+            <input class="form-input" id="add-student-email" placeholder="student@email.com"/>
+          </div>
+          <button class="btn btn-success" onclick="addStudentManually()">Add Student</button>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:10px;">This student will be added as already <strong>Approved</strong> — useful if they couldn't join via the link.</p>
+      </div>
+    </div>
+
+    <!-- Filter tabs + Search -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-primary btn-sm" onclick="filterStudents('all')"    id="f-all">All</button>
+      <button class="btn btn-ghost  btn-sm" onclick="filterStudents('pending')" id="f-pending"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pending</button>
+      <button class="btn btn-ghost  btn-sm" onclick="filterStudents('approved')"id="f-approved"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Approved</button>
+      <button class="btn btn-ghost  btn-sm" onclick="filterStudents('rejected')"id="f-rejected"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Rejected</button>
+      <input class="form-input" id="student-search" placeholder="🔍 Search by name or roll no..." style="flex:1;min-width:180px;margin-left:auto" oninput="filterStudents(currentFilter)"/>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Students</span>
+        <span style="font-size:0.8rem;color:var(--text-muted)" id="students-count">0 students</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Roll No.</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="students-tbody">
+            <tr><td colspan="7"><div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><p>No students yet.</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ MARKS ══════════════ -->
+  <div class="section" id="sec-marks">
+
+    <div style="display:flex;align-items:end;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+      <div class="form-field" style="margin:0;flex:1;min-width:180px;">
+        <label style="font-size:0.78rem;color:var(--text-muted);">New column name (e.g. Quiz 1, Assignment 2)</label>
+        <input class="form-input" id="new-col-subject" placeholder="Subject / Quiz name"/>
+      </div>
+      <div class="form-field" style="margin:0;width:120px;">
+        <label style="font-size:0.78rem;color:var(--text-muted);">Total marks</label>
+        <input class="form-input" id="new-col-total" type="number" placeholder="e.g. 20" value="20"/>
+      </div>
+      <button class="btn btn-ghost" onclick="addMarksColumn()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Column</button>
+      <button class="btn btn-success" onclick="saveAllMarks()">
+        <span class="sync-dot"></span> Sync to Google Sheets
+      </button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+      <input class="form-input" id="gradebook-search" placeholder="🔍 Search by name or roll no..." style="max-width:320px;flex:1;min-width:200px;" oninput="renderGradebook()"/>
+      <button class="btn btn-ghost btn-sm" id="marks-visibility-btn" onclick="toggleMarksVisibility()">👁️ Loading...</button>
+    </div>
+
+    <div class="card gradebook-card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Gradebook</span>
+        <span style="font-size:0.78rem;color:var(--text-muted)">Every quiz / assignment stays as its own column — nothing gets overwritten</span>
+      </div>
+      <div id="marks-side-list" style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <!-- populated by renderGradebook() -->
+      </div>
+      <div class="table-wrap">
+        <table id="marks-table">
+          <thead id="marks-thead">
+            <tr>
+              <th>Name</th>
+              <th>Roll No.</th>
+            </tr>
+          </thead>
+          <tbody id="marks-tbody">
+            <tr><td colspan="2"><div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><p>No approved students yet.</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p style="font-size:0.78rem;color:var(--text-muted);margin-top:10px;">
+      💡 Marks save automatically as you type — you only need "Sync to Google Sheets" to push them to the Sheet.
+    </p>
+
+    <!-- Google Sheets link -->
+    <div class="card">
+      <div class="card-header"><span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Google Sheets Integration</span></div>
+      <div class="card-body">
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:14px;" id="sheet-status-text">
+          Your Google Sheet will be created automatically the first time you save marks.
+        </p>
+        <div id="sheet-link-wrap" style="display:none;">
+          <a id="sheet-link" href="#" target="_blank" class="btn btn-ghost" style="text-decoration:none;display:inline-block;">
+            📄 Open My Google Sheet
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ QUERIES ══════════════ -->
+  <div class="section" id="sec-queries">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Student Queries</span>
+        <span style="font-size:0.8rem;color:var(--text-muted)" id="queries-count">0 queries</span>
+      </div>
+      <div class="card-body" id="queries-list">
+        <div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div><p>No questions yet.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ PROFILE ══════════════ -->
+  <div class="section" id="sec-profile">
+    <div class="card" style="max-width:600px">
+      <div class="card-header"><span class="card-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:5px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>My Profile</span></div>
+      <div class="card-body">
+        <div style="text-align:center;margin-bottom:28px;">
+          <div class="avatar" id="profile-avatar" style="width:72px;height:72px;font-size:1.6rem;margin:0 auto 12px;overflow:hidden;">A</div>
+          <div style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700" id="profile-name-display">—</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:3px" id="profile-email-display">—</div>
+          <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)"/>
+          <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="document.getElementById('avatar-file-input').click()">📷 Upload Photo (optional)</button>
+        </div>
+
+        <div class="profile-grid">
+          <div class="form-field">
+            <label>Your Name (TA)</label>
+            <input class="form-input" id="p-ta-name" placeholder="Your full name"/>
+          </div>
+          <div class="form-field">
+            <label>Email (cannot change)</label>
+            <input class="form-input" id="p-email" readonly/>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveProfile()" style="margin-top:8px">💾 Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✅</span>
+  <span id="toast-msg">Done!</span>
+</div>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ══════════════════════════════════════════
+//  CONFIG — Replace with your values
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'https://loxxobhsyhqaslpqqrqe.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxveHhvYmhzeWhxYXNscHFxcnFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDMyOTMsImV4cCI6MjA5MDE3OTI5M30.PIBtJi8GkRvmE47-KA0JIuRi8JmpbDAPpxyLN7420gM';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let currentTA   = null;   // ta_profiles row
+let allStudents = [];
+let currentFilter = 'all';
+
+// ── INIT ──
+(async () => {
+  const { data:{ session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+  await loadTA(session.user);
+  await loadClasses();
+  await loadAll();
+  setupRealtimeSync();
+  setTimeout(restoreScrollPositions, 100);
+})();
+
+// ── REALTIME SYNC (live updates across devices) ──
+// Whenever another device/tab changes this TA's students or marks,
+// silently refresh the data so everyone stays in sync without a manual reload.
+let realtimeDebounce;
+let refreshRetries = 0;
+function setupRealtimeSync() {
+  if (!currentTA) return;
+
+  sb.channel('ta-portal-sync')
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'students', filter: `ta_id=eq.${currentTA.id}` },
+      () => debouncedRefresh()
+    )
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'marks', filter: `ta_id=eq.${currentTA.id}` },
+      () => debouncedRefresh()
+    )
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'mark_categories', filter: `ta_id=eq.${currentTA.id}` },
+      () => debouncedRefresh()
+    )
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'classes', filter: `ta_id=eq.${currentTA.id}` },
+      () => debouncedRefresh()
+    )
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'mark_queries', filter: `ta_id=eq.${currentTA.id}` },
+      () => debouncedRefresh()
+    )
+    .subscribe();
+}
+
+function debouncedRefresh() {
+  clearTimeout(realtimeDebounce);
+  realtimeDebounce = setTimeout(async () => {
+    // Briefly avoid yanking the table while someone is actively typing a mark —
+    // but never defer for more than ~3 seconds, so the other device is never
+    // stuck stale for long.
+    if (document.activeElement?.closest('#marks-tbody') && refreshRetries < 3) {
+      refreshRetries++;
+      realtimeDebounce = setTimeout(() => debouncedRefresh(), 900);
+      return;
+    }
+    refreshRetries = 0;
+    await loadClasses();
+    await loadAll();
+    showToast('🔄', 'Updated with the latest changes');
+  }, 600);
+}
+
+// ── AVATAR (optional profile picture — falls back to initials) ──
+function renderAvatar(name, avatarUrl) {
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  ['sb-avatar', 'profile-avatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (avatarUrl) {
+      el.innerHTML = `<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${name}"/>`;
+    } else {
+      el.textContent = initials;
+    }
+  });
+}
+
+async function uploadAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('⚠️', 'Please choose an image file.'); return; }
+  if (file.size > 3 * 1024 * 1024) { showToast('⚠️', 'Image must be under 3MB.'); return; }
+
+  showToast('⏳', 'Uploading photo...');
+  const ext  = file.name.split('.').pop();
+  const path = `${currentTA.id}/avatar.${ext}`;
+
+  const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
+  if (upErr) { showToast('❌', 'Upload failed: ' + upErr.message); return; }
+
+  const { data: urlData } = sb.storage.from('avatars').getPublicUrl(path);
+  const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`; // cache-bust so the new photo shows immediately
+
+  const { error: dbErr } = await sb.from('ta_profiles').update({ avatar_url: avatarUrl }).eq('id', currentTA.id);
+  if (dbErr) { showToast('❌', 'Failed to save photo: ' + dbErr.message); return; }
+
+  currentTA.avatar_url = avatarUrl;
+  renderAvatar(currentTA.ta_name, avatarUrl);
+  showToast('✅', 'Profile photo updated!');
+}
+
+async function loadTA(user) {
+  const { data, error } = await sb.from('ta_profiles').select('*').eq('id', user.id).single();
+  if (error || !data) { showToast('❌','Profile not found. Please contact admin.'); return; }
+  currentTA = data;
+
+  // Sidebar
+  renderAvatar(data.ta_name, data.avatar_url);
+  document.getElementById('sb-name').textContent           = data.ta_name;
+  document.getElementById('page-sub').textContent          = `Welcome back, ${data.ta_name.split(' ')[0]} 👋`;
+
+  // Profile form (identity only — class details live under Classes now)
+  document.getElementById('p-ta-name').value  = data.ta_name;
+  document.getElementById('p-email').value    = data.email;
+  document.getElementById('profile-name-display').textContent  = data.ta_name;
+  document.getElementById('profile-email-display').textContent = data.email;
+}
+
+// ── CLASSES (a TA can teach more than one) ──
+let allClasses   = [];   // every class this TA owns
+let currentClass = null; // the class currently selected in the switcher
+
+async function loadClasses() {
+  const { data, error } = await sb.from('classes').select('*').eq('ta_id', currentTA.id).order('created_at', { ascending: true });
+  if (error) { showToast('❌', 'Failed to load classes: ' + error.message); return; }
+  allClasses = data || [];
+
+  if (!allClasses.length) {
+    // Shouldn't normally happen (signup always creates one), but guard anyway.
+    const { data: created } = await sb.from('classes').insert({ ta_id: currentTA.id, name: 'My Class' }).select().single();
+    if (created) allClasses = [created];
+  }
+
+  const savedId = localStorage.getItem('ta_current_class');
+  currentClass = allClasses.find(c => c.id === savedId) || allClasses[0];
+  localStorage.setItem('ta_current_class', currentClass.id);
+
+  renderClassSwitcher();
+  renderClassInfo();
+}
+
+function renderClassSwitcher() {
+  const sel = document.getElementById('class-switcher');
+  if (!sel) return;
+  sel.innerHTML = allClasses.map(c => `<option value="${c.id}" ${c.id===currentClass.id?'selected':''}>${c.name}</option>`).join('');
+}
+
+async function switchClass(classId) {
+  const found = allClasses.find(c => c.id === classId);
+  if (!found) return;
+  currentClass = found;
+  localStorage.setItem('ta_current_class', currentClass.id);
+  renderClassInfo();
+  await loadAll();
+  showToast('📚', `Switched to "${currentClass.name}"`);
+}
+
+async function addNewClass() {
+  const name = prompt('New class name (e.g. "Data Structures — Section B"):');
+  if (!name || !name.trim()) return;
+  const sir = prompt("Sir's name for this class (optional):") || null;
+
+  const { data: tokenData, error: tokenErr } = await sb.rpc('generate_class_token');
+  if (tokenErr) { showToast('❌', 'Failed to create class.'); return; }
+
+  const { data, error } = await sb.from('classes').insert({
+    ta_id: currentTA.id, name: name.trim(), sir_name: sir, class_link_token: tokenData,
+  }).select().single();
+
+  if (error) { showToast('❌', 'Failed to create class: ' + error.message); return; }
+
+  allClasses.push(data);
+  currentClass = data;
+  localStorage.setItem('ta_current_class', currentClass.id);
+  renderClassSwitcher();
+  renderClassInfo();
+  await loadAll();
+  showToast('✅', `Class "${data.name}" created!`);
+}
+
+function renderClassInfo() {
+  if (!currentClass) return;
+  // Preview card
+  document.getElementById('prev-ta-name').textContent = currentTA.ta_name;
+  document.getElementById('prev-course').textContent  = currentClass.name;
+  document.getElementById('prev-sir').textContent     = currentClass.sir_name || '—';
+
+  // Editable class fields (on the Class Link page)
+  const nameInput = document.getElementById('c-name');
+  const sirInput  = document.getElementById('c-sir-name');
+  if (nameInput) nameInput.value = currentClass.name;
+  if (sirInput)  sirInput.value  = currentClass.sir_name || '';
+
+  renderTeacherLinkBox(currentClass.teacher_view_token);
+
+  updateSheetLinkUI(currentClass.google_sheet_url);
+  renderLinkBox(currentClass.class_link_token);
+  renderMarksVisibilityBtn();
+}
+
+function renderMarksVisibilityBtn() {
+  const btn = document.getElementById('marks-visibility-btn');
+  if (!btn || !currentClass) return;
+  if (currentClass.marks_visible) {
+    btn.textContent = '👁️ Marks Visible to Class';
+    btn.classList.add('btn-success');
+    btn.classList.remove('btn-ghost');
+  } else {
+    btn.textContent = '🙈 Marks Hidden from Class';
+    btn.classList.add('btn-ghost');
+    btn.classList.remove('btn-success');
+  }
+}
+
+async function toggleMarksVisibility() {
+  const newVal = !currentClass.marks_visible;
+  const { error } = await sb.from('classes').update({ marks_visible: newVal }).eq('id', currentClass.id);
+  if (error) { showToast('❌', 'Failed to update: ' + error.message); return; }
+  currentClass.marks_visible = newVal;
+  renderMarksVisibilityBtn();
+  showToast(newVal ? '👁️' : '🙈', newVal ? 'Students can now see their marks.' : 'Marks are now hidden from students.');
+}
+
+async function saveClassDetails() {
+  const name = document.getElementById('c-name').value.trim();
+  const sir  = document.getElementById('c-sir-name').value.trim();
+  if (!name) { showToast('⚠️', 'Class name is required.'); return; }
+
+  const { error } = await sb.from('classes').update({ name, sir_name: sir || null }).eq('id', currentClass.id);
+  if (error) { showToast('❌', 'Save failed: ' + error.message); return; }
+
+  currentClass.name = name;
+  currentClass.sir_name = sir || null;
+  const idx = allClasses.findIndex(c => c.id === currentClass.id);
+  if (idx > -1) allClasses[idx] = currentClass;
+  renderClassSwitcher();
+  renderClassInfo();
+  showToast('✅', 'Class details updated!');
+}
+
+async function generateTeacherLink() {
+  const { data: tokenData, error } = await sb.rpc('generate_class_token');
+  if (error) { showToast('❌', 'Failed to generate link.'); return; }
+  const { error: updErr } = await sb.from('classes').update({ teacher_view_token: tokenData }).eq('id', currentClass.id);
+  if (updErr) { showToast('❌', 'Failed to save link.'); return; }
+  currentClass.teacher_view_token = tokenData;
+  renderTeacherLinkBox(tokenData);
+  showToast('👨‍🏫', 'Teacher link generated!');
+}
+
+function renderTeacherLinkBox(token) {
+  const el = document.getElementById('teacher-link-display');
+  if (!token) { el.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="generateTeacherLink()">⚡ Generate Teacher Link</button>`; return; }
+  const url = `${window.location.origin}/teacher-view.html?token=${token}`;
+  el.innerHTML = `
+    <div class="link-box">
+      <span class="link-url">${url}</span>
+      <button class="copy-btn" onclick="copyLink('${url}')">📋 Copy</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <a href="https://wa.me/?text=${encodeURIComponent('Class progress view: '+url)}" target="_blank" class="btn btn-ghost btn-sm">📱 Share on WhatsApp</a>
+      <button class="btn btn-ghost btn-sm" onclick="generateTeacherLink()">⚡ Regenerate</button>
+    </div>`;
+}
+
+async function loadAll() {
+  if (!currentTA || !currentClass) return;
+  await loadStudents();
+  await loadQueries();
+  updateOverviewStats();
+}
+
+// ── STUDENT QUERIES ──
+async function loadQueries() {
+  const { data, error } = await sb
+    .from('mark_queries')
+    .select('*, students(name, roll_no), mark_categories(name)')
+    .eq('ta_id', currentTA.id)
+    .order('created_at', { ascending: false });
+  // Note: reply and replied_at columns are included automatically via '*'
+
+  if (error) { showToast('❌', 'Failed to load queries: ' + error.message); return; }
+
+  // Only show this class's queries (mark_queries is TA-wide; filter by category belonging to current class)
+  const classQueries = (data || []).filter(q => marksColumns.some(c => c.id === q.category_id));
+
+  document.getElementById('queries-count').textContent = `${classQueries.length} quer${classQueries.length!==1?'ies':'y'}`;
+
+  const unresolved = classQueries.filter(q => !q.resolved).length;
+  const badge = document.getElementById('queries-badge');
+  badge.textContent = unresolved;
+  badge.style.display = unresolved > 0 ? 'inline' : 'none';
+
+  const list = document.getElementById('queries-list');
+  if (!classQueries.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div><p>No questions yet.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = classQueries.map(q => `
+    <div style="border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;${q.resolved?'opacity:0.85':''}">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;flex-wrap:wrap;">
+        <div>
+          <strong>${q.students?.name || 'Unknown'}</strong>
+          <span style="color:var(--text-muted);font-size:0.8rem"> · ${q.students?.roll_no || ''} · about <strong>${q.mark_categories?.name || ''}</strong></span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleQueryResolved('${q.id}', ${!q.resolved})">
+          ${q.resolved ? '↺ Reopen' : '✓ Mark Resolved'}
+        </button>
+      </div>
+      <p style="margin-top:8px;font-size:0.9rem;">${(q.message||'').replace(/</g,'&lt;')}</p>
+      ${(q.photo_urls||[]).length ? `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">${q.photo_urls.map(u=>`<a href="${u}" target="_blank"><img src="${u}" style="width:70px;height:70px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border)"/></a>`).join('')}</div>` : ''}
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">${new Date(q.created_at).toLocaleString()}</div>
+
+      ${q.reply ? `
+        <div style="margin-top:12px;padding:12px;background:var(--surface);border-left:3px solid var(--brand-secondary);border-radius:var(--radius-md);">
+          <div style="font-size:0.72rem;color:var(--brand-secondary);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Your Reply</div>
+          <p style="font-size:0.87rem;">${q.reply.replace(/</g,'&lt;')}</p>
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;">${q.replied_at ? new Date(q.replied_at).toLocaleString() : ''}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="toggleReplyForm('${q.id}')">✏️ Edit Reply</button>
+      ` : `
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="toggleReplyForm('${q.id}')">💬 Reply to Student</button>
+      `}
+      <div id="reply-form-${q.id}" style="display:none;margin-top:10px;">
+        <textarea id="reply-text-${q.id}" rows="2" placeholder="Write your reply..." style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-size:0.87rem;color:var(--text-primary);resize:vertical;">${q.reply || ''}</textarea>
+        <button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="sendQueryReply('${q.id}')">Send Reply</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleReplyForm(id) {
+  const el = document.getElementById(`reply-form-${id}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function sendQueryReply(id) {
+  const text = document.getElementById(`reply-text-${id}`).value.trim();
+  if (!text) { showToast('⚠️', 'Please write a reply first.'); return; }
+
+  const { error } = await sb.from('mark_queries').update({
+    reply: text,
+    replied_at: new Date().toISOString(),
+    resolved: true,
+  }).eq('id', id);
+
+  if (error) { showToast('❌', 'Failed to send reply: ' + error.message); return; }
+  showToast('✅', 'Reply sent!');
+  await loadQueries();
+}
+
+async function toggleQueryResolved(id, resolved) {
+  const { error } = await sb.from('mark_queries').update({ resolved }).eq('id', id);
+  if (error) { showToast('❌', 'Failed to update.'); return; }
+  await loadQueries();
+}
+
+async function loadStudents() {
+  const { data, error } = await sb.from('students').select('*').eq('class_id', currentClass.id).order('roll_no', { ascending: true });
+  allStudents = data || [];
+  renderStudents(allStudents);
+  await loadMarksData();
+
+  const pendingCount = allStudents.filter(s=>s.status==='pending').length;
+  const badge = document.getElementById('pending-badge');
+  badge.textContent   = pendingCount;
+  badge.style.display = pendingCount > 0 ? 'inline' : 'none';
+}
+
+// ── GRADEBOOK (multi-column marks) ──
+let marksColumns = [];        // [{ id, name, total }]  (id = mark_categories.id)
+let marksLookup  = {};        // { [category_id]: { [student_id]: { marks, remarks } } }
+
+async function loadMarksData() {
+  const { data: cats, error: catErr } = await sb.from('mark_categories').select('*').eq('class_id', currentClass.id).order('created_at', { ascending: true });
+  if (catErr) { showToast('❌', 'Failed to load columns: ' + catErr.message); return; }
+  marksColumns = (cats || []).map(c => ({ id: c.id, name: c.name, total: c.total || 20 }));
+
+  const categoryIds = marksColumns.map(c => c.id);
+  const { data: marks, error: markErr } = categoryIds.length
+    ? await sb.from('marks').select('*').in('category_id', categoryIds)
+    : { data: [], error: null };
+  if (markErr) { showToast('❌', 'Failed to load marks: ' + markErr.message); return; }
+
+  marksLookup = {};
+  (marks || []).forEach(m => {
+    if (!marksLookup[m.category_id]) marksLookup[m.category_id] = {};
+    marksLookup[m.category_id][m.student_id] = { marks: m.marks, remarks: m.remarks };
+  });
+
+  // Restore any changes that never made it to the database (e.g. the phone
+  // was turned off, or connection dropped) — they're kept safe in this
+  // browser's storage until they successfully sync.
+  loadPendingFromStorage();
+
+  renderGradebook();
+  reapplyPendingIndicators();
+  retryPendingSaves();
+}
+
+async function addMarksColumn() {
+  const name  = document.getElementById('new-col-subject').value.trim();
+  const total = parseFloat(document.getElementById('new-col-total').value) || 20;
+  if (!name) { showToast('⚠️', 'Please enter a column name.'); return; }
+  if (marksColumns.some(c => c.name === name)) {
+    showToast('⚠️', 'A column with that name already exists — scroll right to find it.');
+    return;
+  }
+
+  // Persist immediately — the column survives a refresh even with 0 marks in it yet.
+  const { data, error } = await sb.from('mark_categories').insert({ ta_id: currentTA.id, class_id: currentClass.id, name, total }).select().single();
+  if (error) { showToast('❌', 'Failed to add column: ' + error.message); return; }
+
+  marksColumns.push({ id: data.id, name: data.name, total: data.total });
+  marksLookup[data.id] = {};
+  activeColumnId = data.id;
+  localStorage.setItem(activeColumnStorageKey(), data.id);
+  document.getElementById('new-col-subject').value = '';
+  document.getElementById('new-col-total').value = 20;
+  renderGradebook();
+  showToast('✅', `Column "${name}" added.`);
+}
+
+async function renameColumn(categoryId) {
+  const col = marksColumns.find(c => c.id === categoryId);
+  if (!col) return;
+  const newName = prompt('Column name:', col.name);
+  if (!newName || !newName.trim()) return;
+  const newTotalRaw = prompt('Total marks for this column:', col.total);
+  const newTotal = parseFloat(newTotalRaw);
+  if (isNaN(newTotal) || newTotal <= 0) { showToast('⚠️', 'Total marks must be a positive number.'); return; }
+
+  const trimmed = newName.trim();
+  if (trimmed === col.name && newTotal === col.total) return;
+
+  const { error: e1 } = await sb.from('mark_categories').update({ name: trimmed, total: newTotal }).eq('id', categoryId);
+  if (e1) { showToast('❌', 'Update failed: ' + e1.message); return; }
+  // Keep the legacy `subject`/`total` text columns in sync too (used by the Sheets sync).
+  await sb.from('marks').update({ subject: trimmed, total: newTotal }).eq('category_id', categoryId);
+
+  col.name  = trimmed;
+  col.total = newTotal;
+  renderGradebook();
+  showToast('✅', 'Column updated.');
+}
+
+let activeColumnId = null;
+function activeColumnStorageKey() { return `ta_gradebook_column_${currentClass?.id}`; }
+
+function renderGradebook() {
+  const thead = document.getElementById('marks-thead');
+  const tbody = document.getElementById('marks-tbody');
+  const sideList = document.getElementById('marks-side-list');
+  let approved = allStudents.filter(s => s.status === 'approved');
+
+  const q = document.getElementById('gradebook-search')?.value.trim().toLowerCase();
+  if (q) {
+    approved = approved.filter(s =>
+      s.name.toLowerCase().includes(q) || s.roll_no.toLowerCase().includes(q)
+    );
+  }
+
+  // Work out which column to show: the one last opened for this class,
+  // or the first available column if none was remembered.
+  if (!activeColumnId || !marksColumns.some(c => c.id === activeColumnId)) {
+    const saved = localStorage.getItem(activeColumnStorageKey());
+    activeColumnId = marksColumns.some(c => c.id === saved) ? saved : (marksColumns[0]?.id || null);
+  }
+
+  // Horizontal "Jump to" pills — clicking one switches which column is shown.
+  // Student names/roll numbers always stay visible; only the marks column changes.
+  const listHtml = `<span style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Jump to:</span>` +
+    (marksColumns.length
+      ? marksColumns.map((c) => `
+          <span class="side-list-item${c.id===activeColumnId?' active-pill':''}">
+            <span onclick="switchGradebookColumn('${c.id}')" style="cursor:pointer;">${c.name}</span>
+            <span onclick="renameColumn('${c.id}')" title="Rename" style="cursor:pointer;margin-left:6px;opacity:0.7;">✏️</span>
+          </span>`).join('')
+      : `<span style="font-size:0.78rem;color:var(--text-muted);">No columns yet</span>`);
+  sideList.innerHTML = listHtml;
+
+  const activeCol = marksColumns.find(c => c.id === activeColumnId);
+
+  thead.innerHTML = `<tr>
+    <th>Name</th><th>Roll No.</th>
+    ${activeCol ? `<th>${activeCol.name}<br><span style="font-weight:400;color:var(--text-muted);font-size:0.72rem">/ ${activeCol.total}</span></th>` : ''}
+  </tr>`;
+
+  if (!approved.length) {
+    tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><p>No approved students yet.</p></div></td></tr>`;
+    return;
+  }
+
+  if (!activeCol) {
+    tbody.innerHTML = approved.map(s => `
+      <tr><td><strong>${s.name}</strong></td><td style="font-family:monospace;color:var(--accent)">${s.roll_no}</td></tr>
+    `).join('');
+    return;
+  }
+
+  tbody.innerHTML = approved.map(s => {
+    const existing = marksLookup[activeCol.id]?.[s.id];
+    return `
+    <tr>
+      <td><strong>${s.name}</strong></td>
+      <td style="font-family:monospace;color:var(--accent)">${s.roll_no}</td>
+      <td><input class="marks-input" data-category="${activeCol.id}" data-student="${s.id}"
+            type="number" min="0" placeholder="—" style="width:70px"
+            value="${existing?.marks ?? ''}" onchange="updateMarksCell(this)"/></td>
+    </tr>`;
+  }).join('');
+}
+
+function switchGradebookColumn(categoryId) {
+  activeColumnId = categoryId;
+  localStorage.setItem(activeColumnStorageKey(), categoryId);
+  renderGradebook();
+}
+
+// Auto-saves the moment a TA finishes typing a mark — no need to hit
+// "Save & Sync Sheets" just to keep the data safe. That button is now only
+// needed to push everything to Google Sheets.
+//
+// If the save fails (e.g. internet drops), the cell is remembered here AND
+// written to localStorage — so even if the phone is closed or turned off
+// mid-edit, nothing is lost. It's picked up again and retried the next
+// time this dashboard is opened, or the moment the connection returns.
+let pendingSaves = {};
+function cellKey(categoryId, studentId) { return `${categoryId}:${studentId}`; }
+function pendingStorageKey() { return `ta_portal_pending_${currentClass?.id}`; }
+
+function savePendingToStorage() {
+  try { localStorage.setItem(pendingStorageKey(), JSON.stringify(pendingSaves)); }
+  catch (e) { /* storage unavailable — safe to ignore, retry logic still works this session */ }
+}
+
+function loadPendingFromStorage() {
+  try {
+    const raw = localStorage.getItem(pendingStorageKey());
+    if (!raw) return;
+    const stored = JSON.parse(raw);
+    Object.keys(stored).forEach(key => {
+      pendingSaves[key] = stored[key];
+      const p = stored[key];
+      // Make sure the unsaved value still shows in the gradebook immediately,
+      // even before we've re-fetched/retried anything.
+      if (p.type === 'upsert') {
+        if (!marksLookup[p.categoryId]) marksLookup[p.categoryId] = {};
+        marksLookup[p.categoryId][p.studentId] = { marks: p.val, remarks: null };
+      }
+    });
+  } catch (e) { /* corrupted/unavailable storage — ignore */ }
+}
+
+function markCellFailed(input, failed) {
+  if (!input) return;
+  input.style.borderColor = failed ? '#C63D2F' : '';
+  input.title = failed ? 'Not saved yet — will retry automatically once you\'re back online' : '';
+}
+
+// Re-apply the red "not saved yet" outline after the table re-renders
+// (new <input> elements are created each time, so the styling needs reapplying).
+function reapplyPendingIndicators() {
+  Object.keys(pendingSaves).forEach(key => {
+    const p = pendingSaves[key];
+    const input = document.querySelector(`.marks-input[data-category="${p.categoryId}"][data-student="${p.studentId}"]`);
+    markCellFailed(input, true);
+  });
+}
+
+async function updateMarksCell(input) {
+  const categoryId = input.dataset.category;
+  const studentId  = input.dataset.student;
+  const col = marksColumns.find(c => c.id === categoryId);
+  if (!col) return;
+
+  const val = input.value === '' ? null : parseFloat(input.value);
+  if (!marksLookup[categoryId]) marksLookup[categoryId] = {};
+  marksLookup[categoryId][studentId] = { marks: isNaN(val) ? null : val, remarks: null };
+
+  const key = cellKey(categoryId, studentId);
+
+  if (val === null || isNaN(val)) {
+    const { error } = await sb.from('marks').delete().eq('student_id', studentId).eq('category_id', categoryId);
+    if (error) {
+      pendingSaves[key] = { type: 'delete', categoryId, studentId };
+      markCellFailed(input, true);
+      showToast('⚠️', "Offline — saved on this device, will sync once you're back online.");
+    } else {
+      delete pendingSaves[key];
+      markCellFailed(input, false);
+    }
+    savePendingToStorage();
+    return;
+  }
+
+  const { error } = await sb.from('marks').upsert({
+    student_id:  studentId,
+    ta_id:       currentTA.id,
+    category_id: categoryId,
+    subject:     col.name,
+    marks:       val,
+    total:       col.total,
+  }, { onConflict: 'student_id,category_id,subject' });
+
+  if (error) {
+    pendingSaves[key] = { type: 'upsert', categoryId, studentId, col, val };
+    markCellFailed(input, true);
+    showToast('⚠️', "Offline — saved on this device, will sync once you're back online.");
+  } else {
+    delete pendingSaves[key];
+    markCellFailed(input, false);
+  }
+  savePendingToStorage();
+}
+
+async function retryPendingSaves() {
+  const keys = Object.keys(pendingSaves);
+  if (!keys.length) return;
+  showToast('🔄', `Syncing ${keys.length} unsaved mark(s)...`);
+
+  for (const key of keys) {
+    const p = pendingSaves[key];
+    const input = document.querySelector(`.marks-input[data-category="${p.categoryId}"][data-student="${p.studentId}"]`);
+
+    if (p.type === 'delete') {
+      const { error } = await sb.from('marks').delete().eq('student_id', p.studentId).eq('category_id', p.categoryId);
+      if (!error) { delete pendingSaves[key]; markCellFailed(input, false); }
+    } else {
+      const { error } = await sb.from('marks').upsert({
+        student_id: p.studentId, ta_id: currentTA.id, category_id: p.categoryId,
+        subject: p.col.name, marks: p.val, total: p.col.total,
+      }, { onConflict: 'student_id,category_id,subject' });
+      if (!error) { delete pendingSaves[key]; markCellFailed(input, false); }
+    }
+  }
+
+  savePendingToStorage();
+  if (!Object.keys(pendingSaves).length) showToast('✅', 'All marks are saved.');
+}
+
+window.addEventListener('online', retryPendingSaves);
+window.addEventListener('beforeunload', (e) => {
+  if (Object.keys(pendingSaves).length) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+function extractSheetId(url) {
+  if (!url) return null;
+  const m = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return m ? m[1] : null;
+}
+
+function updateSheetLinkUI(url) {
+  const statusText = document.getElementById('sheet-status-text');
+  const linkWrap    = document.getElementById('sheet-link-wrap');
+  const link         = document.getElementById('sheet-link');
+  if (url) {
+    statusText.textContent = 'Your marks are synced to this Google Sheet:';
+    link.href = url;
+    linkWrap.style.display = 'block';
+  } else {
+    statusText.textContent = 'Your Google Sheet will be created automatically the first time you save marks.';
+    linkWrap.style.display = 'none';
+  }
+}
+
+// Marks are already auto-saved as the TA types (see updateMarksCell above).
+// This button's job now is simply to push the current gradebook to Sheets.
+async function saveAllMarks() {
+  if (!marksColumns.length) { showToast('⚠️', 'Add at least one column first.'); return; }
+  const approved = allStudents.filter(s => s.status === 'approved');
+  showToast('🎉', 'Syncing to Google Sheets...');
+  await syncToGoogleSheets(approved);
+}
+
+async function syncToGoogleSheets(approvedStudents) {
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwK3mRWumYAnzD3bghfD7NfbyZwC8wW5XtG9ZCs_virRZOWKgN7BkyH2whKE0_nLPuxAg/exec';
+
+  // Send the ENTIRE current gradebook (all columns, alphabetical order) so the
+  // sheet always mirrors the dashboard exactly — Quiz 1, Quiz 2, etc. all as
+  // their own columns, never mixed together.
+  const students = approvedStudents.map(s => ({ name: s.name, roll_no: s.roll_no }));
+  const columns  = marksColumns.map(c => c.name);
+  const grid = {};
+  marksColumns.forEach(c => {
+    grid[c.name] = {};
+    approvedStudents.forEach(s => {
+      const cell = marksLookup[c.id]?.[s.id];
+      grid[c.name][s.roll_no] = cell?.marks ?? '';
+    });
+  });
+
+  const payload = {
+    class_id:  currentClass.id,
+    class_name: currentClass.name,
+    ta_name:  currentTA.ta_name,
+    ta_email: currentTA.email,
+    sheet_id: extractSheetId(currentClass.google_sheet_url),
+    students,
+    columns,
+    grid,
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body:    JSON.stringify(payload),
+      mode:    'no-cors', // Google Apps Script requires this
+    });
+    showToast('🎉', 'Marks synced to Google Sheets!');
+
+    // If this was the first sync, the sheet was just created — refresh to pick up the link.
+    if (!currentClass.google_sheet_url) {
+      setTimeout(async () => {
+        const { data } = await sb.from('classes').select('google_sheet_url').eq('id', currentClass.id).single();
+        if (data?.google_sheet_url) {
+          currentClass.google_sheet_url = data.google_sheet_url;
+          updateSheetLinkUI(data.google_sheet_url);
+          showToast('📄', 'Your Google Sheet is ready!');
+        }
+      }, 4000);
+    }
+  } catch (err) {
+    showToast('⚠️', 'Sync failed: ' + err.message);
+  }
+}
+
+// ── OVERVIEW STATS ──
+function updateOverviewStats() {
+  const total    = allStudents.length;
+  const approved = allStudents.filter(s=>s.status==='approved').length;
+  const pending  = allStudents.filter(s=>s.status==='pending').length;
+  document.getElementById('ov-total').textContent    = total;
+  document.getElementById('ov-approved').textContent = approved;
+  document.getElementById('ov-pending').textContent  = pending;
+  document.getElementById('ov-marks').textContent    = '—';
+
+  // Overview link box
+  const ovLinkBox = document.getElementById('ov-link-box');
+  if (currentClass?.class_link_token) {
+    const url = `${window.location.origin}/join.html?ta=${currentClass.class_link_token}`;
+    ovLinkBox.innerHTML = `<div class="link-box"><span class="link-url">${url}</span><button class="copy-btn" onclick="copyLink('${url}')">Copy</button></div>`;
+  }
+
+  // Overview recent students
+  const el = document.getElementById('ov-recent-students');
+  const recent = allStudents.slice(0,3);
+  if (!recent.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><p>No students yet.</p></div>`; return; }
+  el.innerHTML = `<table><thead><tr><th>Name</th><th>Roll No.</th><th>Status</th></tr></thead><tbody>
+    ${recent.map(s=>`<tr><td>${s.name}</td><td>${s.roll_no}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+// ── STUDENTS TABLE ──
+function toggleAddStudentForm() {
+  const card = document.getElementById('add-student-card');
+  card.style.display = card.style.display === 'none' ? 'block' : 'none';
+}
+
+async function addStudentManually() {
+  const name  = document.getElementById('add-student-name').value.trim();
+  const roll  = document.getElementById('add-student-roll').value.trim();
+  const email = document.getElementById('add-student-email').value.trim();
+
+  if (!name || !roll) { showToast('⚠️', 'Please enter both name and roll number.'); return; }
+
+  const { error } = await sb.from('students').insert({
+    ta_id: currentTA.id,
+    class_id: currentClass.id,
+    name,
+    roll_no: roll,
+    email: email || null,
+    status: 'approved',
+  });
+
+  if (error) {
+    if (error.message.includes('duplicate') || error.code === '23505') {
+      showToast('❌', 'A student with this roll number already exists.');
+    } else {
+      showToast('❌', 'Failed to add student: ' + error.message);
+    }
+    return;
+  }
+
+  showToast('✅', `${name} added successfully!`);
+  document.getElementById('add-student-name').value = '';
+  document.getElementById('add-student-roll').value = '';
+  document.getElementById('add-student-email').value = '';
+  document.getElementById('add-student-card').style.display = 'none';
+  await loadStudents();
+}
+
+function filterStudents(f) {
+  currentFilter = f;
+  ['all','pending','approved','rejected'].forEach(x => {
+    const b = document.getElementById(`f-${x}`);
+    b.className = x===f ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+  });
+  let filtered = f==='all' ? allStudents : allStudents.filter(s=>s.status===f);
+
+  const q = document.getElementById('student-search')?.value.trim().toLowerCase();
+  if (q) {
+    filtered = filtered.filter(s =>
+      s.name.toLowerCase().includes(q) || s.roll_no.toLowerCase().includes(q)
+    );
+  }
+  renderStudents(filtered);
+}
+
+function renderStudents(list) {
+  const tbody = document.getElementById('students-tbody');
+  document.getElementById('students-count').textContent = `${list.length} student${list.length!==1?'s':''}`;
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><p>No students found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map((s,i) => `
+    <tr>
+      <td style="color:var(--text-muted)">${i+1}</td>
+      <td><strong>${s.name}</strong></td>
+      <td style="font-family:monospace;color:var(--brand-primary)">${s.roll_no}</td>
+      <td style="color:var(--text-muted);font-size:0.82rem">${s.email || '—'}</td>
+      <td>${badgeHtml(s.status)}</td>
+      <td style="color:var(--text-muted);font-size:0.8rem">${new Date(s.created_at).toLocaleDateString('en-PK')}</td>
+      <td>
+        <div class="action-btns">
+          ${s.status==='pending' ? `
+            <button class="btn btn-success btn-sm" onclick="updateStudent('${s.id}','approved')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Approve</button>
+            <button class="btn btn-danger  btn-sm" onclick="updateStudent('${s.id}','rejected')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Reject</button>
+          ` : s.status==='approved' ? `
+            <button class="btn btn-danger btn-sm" onclick="updateStudent('${s.id}','rejected')">Remove</button>
+          ` : `
+            <button class="btn btn-ghost btn-sm" onclick="updateStudent('${s.id}','approved')">Re-approve</button>
+          `}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function updateStudent(id, status) {
+  const { error } = await sb.from('students').update({ status }).eq('id', id);
+  if (error) { showToast('❌', 'Failed to update student.'); return; }
+  showToast('✅', `Student ${status}!`);
+  await loadStudents();
+  updateOverviewStats();
+}
+
+function badgeHtml(status) {
+  const map = { pending:'badge-pending', approved:'badge-approved', rejected:'badge-rejected' };
+  const ic = (p) => `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px;">${p}</svg>`;
+  const icons = {
+    pending:  ic('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
+    approved: ic('<polyline points="20 6 9 17 4 12"/>'),
+    rejected: ic('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
+  };
+  const labels = { pending:'Pending', approved:'Approved', rejected:'Rejected' };
+  return `<span class="badge ${map[status]||''}">${icons[status]||''}${labels[status]||status}</span>`;
+}
+
+// ── CLASS LINK ──
+async function generateLink() {
+  const { data, error } = await sb.rpc('generate_class_token');
+  if (error) { showToast('❌','Failed to generate link.'); return; }
+  const token = data;
+  await sb.from('classes').update({ class_link_token: token }).eq('id', currentClass.id);
+  currentClass.class_link_token = token;
+  renderLinkBox(token);
+  updateOverviewStats();
+  showToast('🔗','New class link generated!');
+}
+
+function renderLinkBox(token) {
+  const el = document.getElementById('link-display');
+  if (!token) { el.innerHTML = '<p style="color:var(--text-muted);font-size:0.88rem">No link yet. Click Generate.</p>'; return; }
+  const url = `${window.location.origin}/join.html?ta=${token}`;
+  el.innerHTML = `
+    <div class="link-box">
+      <span class="link-url">${url}</span>
+      <button class="copy-btn" onclick="copyLink('${url}')">📋 Copy</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <a href="https://wa.me/?text=${encodeURIComponent('Join my class on Aurelis: '+url)}" target="_blank" class="btn btn-ghost btn-sm">📱 Share on WhatsApp</a>
+      <a href="mailto:?subject=Join my TA class&body=${encodeURIComponent('Join my class: '+url)}" class="btn btn-ghost btn-sm">✉️ Share via Email</a>
+    </div>
+  `;
+}
+
+function copyLink(url) {
+  navigator.clipboard.writeText(url).then(() => showToast('📋','Link copied!'));
+}
+
+// ── PROFILE ──
+async function saveProfile() {
+  const ta_name  = document.getElementById('p-ta-name').value.trim();
+  if (!ta_name) { showToast('⚠️','Please enter your name.'); return; }
+
+  const { error } = await sb.from('ta_profiles').update({ ta_name }).eq('id', currentTA.id);
+  if (error) { showToast('❌','Save failed.'); return; }
+
+  currentTA.ta_name  = ta_name;
+
+  document.getElementById('sb-name').textContent          = ta_name;
+  document.getElementById('profile-name-display').textContent = ta_name;
+  document.getElementById('prev-ta-name').textContent     = ta_name;
+  renderAvatar(ta_name, currentTA.avatar_url);
+
+  showToast('✅','Profile updated!');
+}
+
+// ── LOGOUT ──
+async function handleLogout() {
+  await sb.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+// ── NAV ──
+const sectionMeta = {
+  overview: { title:'Overview',    sub:'Your TA dashboard at a glance' },
+  link:     { title:'Class Link',  sub:'Share this link with your students' },
+  students: { title:'Students',    sub:'Manage student registrations' },
+  marks:    { title:'Marks',       sub:'Enter marks and sync to Google Sheets' },
+  queries:  { title:'Queries',     sub:'Questions your students asked about their marks' },
+  profile:  { title:'My Profile',  sub:'Update your TA information' },
+};
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`sec-${id}`).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => { if(n.textContent.toLowerCase().includes(id==='overview'?'overview':id)) n.classList.add('active'); });
+  const meta = sectionMeta[id] || {};
+  document.getElementById('page-title').textContent = meta.title || id;
+  document.getElementById('page-sub').textContent   = meta.sub   || '';
+  document.body.classList.toggle('compact-sidebar', id === 'marks');
+  localStorage.setItem('ta_last_section', id);
+  closeSidebar();
+}
+
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('overlay').classList.add('show'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+
+// ── TOAST ──
+let toastTimer;
+function showToast(icon, msg) {
+  clearTimeout(toastTimer);
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent  = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// Restore whichever tab the TA was last on — INSTANTLY, without waiting for
+// data to load, so there's no flash of "Overview" before it switches.
+(() => {
+  const savedSection = localStorage.getItem('ta_last_section');
+  if (savedSection && sectionMeta[savedSection]) showSection(savedSection);
+})();
+
+// ── SCROLL POSITION MEMORY ──
+// Remembers how far down the page (and the gradebook table specifically)
+// the TA had scrolled, and puts them back there after a refresh.
+let scrollSaveTimer;
+function saveScrollPositions() {
+  clearTimeout(scrollSaveTimer);
+  scrollSaveTimer = setTimeout(() => {
+    localStorage.setItem('ta_scroll_window', window.scrollY);
+    const gb = document.querySelector('.gradebook-card .table-wrap');
+    if (gb) {
+      localStorage.setItem('ta_scroll_gb_top',  gb.scrollTop);
+      localStorage.setItem('ta_scroll_gb_left', gb.scrollLeft);
+    }
+  }, 150);
+}
+window.addEventListener('scroll', saveScrollPositions);
+document.addEventListener('scroll', (e) => {
+  if (e.target.closest && e.target.closest('.gradebook-card .table-wrap')) saveScrollPositions();
+}, true);
+
+function restoreScrollPositions() {
+  const winY = parseInt(localStorage.getItem('ta_scroll_window'), 10);
+  if (!isNaN(winY)) window.scrollTo(0, winY);
+
+  const gbTop  = parseInt(localStorage.getItem('ta_scroll_gb_top'), 10);
+  const gbLeft = parseInt(localStorage.getItem('ta_scroll_gb_left'), 10);
+  const gb = document.querySelector('.gradebook-card .table-wrap');
+  if (gb) {
+    if (!isNaN(gbTop))  gb.scrollTop  = gbTop;
+    if (!isNaN(gbLeft)) gb.scrollLeft = gbLeft;
+  }
+}
+</script>
+</body>
+</html>

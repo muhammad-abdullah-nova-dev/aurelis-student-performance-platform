@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aurelis — Join Class</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── DESIGN TOKENS ── */
+    :root {
+      --brand-primary:        #C63D2F;
+      --brand-primary-hover:  #B03527;
+      --brand-primary-active: #9E2E22;
+      --brand-secondary:      #3E7A54;
+      --brand-accent:         #D9A441;
+
+      --background:       #F7F1E8;
+      --surface:          #EFE6D4;
+      --surface-elevated: #FDFAF5;
+      --surface-muted:    #EAE0CE;
+
+      --text-primary:   #1E1A17;
+      --text-secondary: #4A3F36;
+      --text-muted:     #7A6E64;
+      --text-disabled:  #B0A89E;
+
+      --border:        #DDD4C0;
+      --border-subtle: #EAE0CE;
+      --border-strong: #C4B99E;
+
+      --success:        #2E6B45;
+      --success-bg:     rgba(46,107,69,0.08);
+      --success-border: rgba(46,107,69,0.25);
+      --warning:        #B8832A;
+      --warning-bg:     rgba(217,164,65,0.10);
+      --warning-border: rgba(217,164,65,0.30);
+      --danger:         #C63D2F;
+      --danger-bg:      rgba(198,61,47,0.08);
+      --danger-border:  rgba(198,61,47,0.25);
+
+      --shadow-xs: 0 1px 3px rgba(30,26,23,0.08);
+      --shadow-sm: 0 2px 8px rgba(30,26,23,0.08), 0 1px 3px rgba(30,26,23,0.05);
+      --shadow-md: 0 4px 16px rgba(30,26,23,0.10), 0 2px 6px rgba(30,26,23,0.06);
+      --shadow-lg: 0 8px 32px rgba(30,26,23,0.12), 0 4px 12px rgba(30,26,23,0.07);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 20px;
+
+      /* Legacy aliases for inline JS-injected HTML that references old vars */
+      --bg: var(--background); --card: var(--surface-elevated);
+      --card2: var(--surface-muted); --accent: var(--brand-primary);
+      --accent2: var(--brand-secondary); --text: var(--text-primary);
+      --muted: var(--text-muted); --border: var(--border);
+      --error: var(--brand-primary);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--background); color: var(--text-primary);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 24px;
+      background-image: radial-gradient(circle, rgba(30,26,23,0.055) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    /* No blob animations */
+    .blob { display: none; }
+
+    .wrapper {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 480px;
+      animation: fadeUp 0.55s ease both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── LOGO ── */
+    .logo {
+      text-align: center; margin-bottom: 22px;
+      font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 700;
+      color: var(--text-primary); letter-spacing: -0.3px;
+    }
+    .logo span { color: var(--brand-primary); }
+
+    /* ── TA INFO CARD ── */
+    .ta-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px 22px;
+      text-align: center; margin-bottom: 16px;
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .ta-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--brand-primary);
+    }
+    .ta-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--brand-primary);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.4rem;
+      color: #fff; margin: 0 auto 12px;
+      box-shadow: 0 4px 16px var(--danger-bg);
+      overflow: hidden;
+    }
+    .ta-label {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2.5px;
+      color: var(--brand-primary); font-weight: 700; margin-bottom: 6px;
+    }
+    .ta-name {
+      font-family: 'Fraunces', serif; font-size: 1.45rem; font-weight: 700;
+      letter-spacing: -0.4px; color: var(--text-primary);
+    }
+    .ta-meta {
+      margin-top: 10px; display: flex; justify-content: center;
+      gap: 6px; flex-wrap: wrap;
+    }
+    .meta-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 5px 13px; border-radius: 100px;
+      font-size: 0.78rem; color: var(--text-muted);
+    }
+    .meta-chip strong { color: var(--text-primary); font-weight: 600; }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px 24px;
+      box-shadow: var(--shadow-md);
+    }
+    .form-title {
+      font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 700;
+      margin-bottom: 4px; color: var(--text-primary); letter-spacing: -0.2px;
+    }
+    .form-sub {
+      font-size: 0.83rem; color: var(--text-muted);
+      margin-bottom: 20px; line-height: 1.55;
+    }
+
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block; font-size: 0.78rem; color: var(--text-muted);
+      margin-bottom: 6px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .input-wrap .ico {
+      position: absolute; left: 13px; font-size: 0.95rem;
+      opacity: 0.5; pointer-events: none;
+    }
+    .input-wrap input {
+      width: 100%; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 11px 14px 11px 38px; color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem;
+      outline: none; transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .input-wrap input::placeholder { color: var(--text-disabled); }
+    .input-wrap input:focus {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px var(--danger-bg);
+      background: var(--surface-elevated);
+    }
+
+    /* ── ALERTS ── */
+    .alert {
+      border-radius: var(--radius-md);
+      padding: 11px 14px; font-size: 0.84rem;
+      margin-bottom: 14px; display: none; line-height: 1.5;
+    }
+    .alert.error {
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger); display: block;
+    }
+    .alert.success {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success); display: block;
+    }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-submit {
+      width: 100%; padding: 13px;
+      background: var(--brand-primary); color: #fff;
+      border: none; border-radius: var(--radius-md);
+      font-family: 'Fraunces', serif; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; margin-top: 6px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 3px 0 var(--brand-primary-active);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 0 var(--brand-primary-active);
+    }
+    .btn-submit:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 2px 0 var(--brand-primary-active);
+    }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── STATE VISIBILITY ── */
+    .state { display: none; }
+    .state.active { display: block; }
+
+    /* ── SKELETON LOADING ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, rgba(30,26,23,0.06) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: var(--radius-sm); height: 18px; margin-bottom: 8px;
+    }
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* ── SUCCESS SCREEN ── */
+    .success-screen { text-align: center; }
+    .success-icon { font-size: 3.5rem; margin-bottom: 14px; }
+    .success-screen h2 {
+      font-family: 'Fraunces', serif; font-size: 1.45rem; font-weight: 700;
+      margin-bottom: 10px; color: var(--text-primary);
+    }
+    .success-screen p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.68; }
+    .success-steps {
+      background: var(--success-bg);
+      border: 1px dashed var(--success-border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px; margin-top: 18px; text-align: left;
+    }
+    .success-steps p { font-size: 0.84rem; color: var(--text-muted); margin-bottom: 7px; }
+    .success-steps p:last-child { margin-bottom: 0; }
+    .success-steps strong { color: var(--brand-secondary); }
+
+    /* ── INVALID SCREEN ── */
+    .invalid-screen { text-align: center; }
+    .invalid-screen .inv-icon { font-size: 2.8rem; margin-bottom: 12px; opacity: 0.5; }
+    .invalid-screen h2 {
+      font-family: 'Fraunces', serif; font-size: 1.25rem; font-weight: 700;
+      margin-bottom: 8px; color: var(--text-primary);
+    }
+    .invalid-screen p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── FOOTER NOTE ── */
+    .footer-note {
+      text-align: center; margin-top: 18px;
+      font-size: 0.78rem; color: var(--text-muted);
+    }
+    .footer-note a {
+      color: var(--brand-primary); text-decoration: none;
+      font-weight: 600;
+    }
+    .footer-note a:hover { text-decoration: underline; }
+
+    /* ── MARKS CHART ── */
+    .marks-chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px; margin-bottom: 12px;
+    }
+    .mc-title {
+      font-family: 'Fraunces', serif; font-weight: 700;
+      font-size: 0.93rem; margin-bottom: 14px; color: var(--text-primary);
+    }
+    .mc-title span {
+      font-weight: 400; font-size: 0.76rem;
+      color: var(--text-muted); font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .mc-bars { display: flex; justify-content: space-around; align-items: end; gap: 10px; }
+    .mc-bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .mc-bar-track {
+      width: 100%; max-width: 36px; height: 86px;
+      display: flex; align-items: end;
+      background: var(--surface-muted); border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .mc-bar { width: 100%; border-radius: var(--radius-sm) var(--radius-sm) 0 0; transition: height 0.6s ease; }
+    .mc-bar-value {
+      font-family: 'Fraunces', serif; font-weight: 700;
+      font-size: 0.8rem; margin-top: 6px; color: var(--text-primary);
+    }
+    .mc-bar-label { font-size: 0.66rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── QUERY SECTION ── */
+    .query-section { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+    .query-list { margin-bottom: 10px; }
+    .query-item {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px; margin-bottom: 8px;
+    }
+    .query-msg { font-size: 0.84rem; color: var(--text-primary); line-height: 1.5; }
+    .query-photos { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .query-photos img {
+      width: 52px; height: 52px; object-fit: cover;
+      border-radius: var(--radius-sm); border: 1px solid var(--border);
+    }
+    .query-meta { font-size: 0.68rem; color: var(--text-muted); margin-top: 5px; }
+    .btn-secondary-sm {
+      background: transparent;
+      border: 1px dashed var(--border-strong);
+      color: var(--text-muted);
+      padding: 8px 14px; border-radius: var(--radius-sm);
+      font-size: 0.8rem; cursor: pointer; width: 100%;
+      transition: border-color 0.18s, color 0.18s;
+    }
+    .btn-secondary-sm:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+    .query-form textarea {
+      width: 100%; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.84rem; color: var(--text-primary);
+      resize: vertical; margin-top: 10px; outline: none;
+    }
+    .query-form textarea:focus {
+      border-color: var(--brand-primary);
+    }
+
+    @media(max-width:480px) {
+      .form-card { padding: 20px 16px; }
+      .ta-card { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+
+  <div class="wrapper">
+    <div class="logo">Aure<span>lis</span></div>
+
+    <!-- LOADING -->
+    <div class="state active" id="state-loading">
+      <div class="ta-card">
+        <div class="ta-avatar" style="background:var(--card2)"></div>
+        <div class="skeleton" style="width:60%;margin:0 auto 8px"></div>
+        <div class="skeleton" style="width:80%;margin:0 auto"></div>
+      </div>
+      <div class="form-card">
+        <div class="skeleton" style="width:50%;margin-bottom:20px"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton" style="height:44px;margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- INVALID LINK -->
+    <div class="state" id="state-invalid">
+      <div class="form-card invalid-screen">
+        <div class="inv-icon">🔗</div>
+        <h2>Invalid Link</h2>
+        <p>This class link is invalid or has expired.<br/>Please ask your TA to share a new link.</p>
+      </div>
+    </div>
+
+    <!-- MAIN FORM -->
+    <div class="state" id="state-form">
+      <div class="ta-card">
+        <div class="ta-avatar" id="ta-avatar">A</div>
+        <div class="ta-label">Teaching Assistant</div>
+        <div class="ta-name" id="ta-name">—</div>
+        <div class="ta-meta">
+          <div class="meta-chip">📚 <strong id="ta-course">—</strong></div>
+          <div class="meta-chip"> Teacher <strong id="ta-sir">—</strong></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-title">Join this Class 🎓</div>
+        <div class="form-sub">Enter your details. Your TA will verify and approve you shortly.</div>
+
+        <div class="alert" id="form-alert"></div>
+
+        <div class="field">
+          <label>Full Name</label>
+          <div class="input-wrap">
+            <span class="ico">👤</span>
+            <input type="text" id="s-name" placeholder="e.g. Your Name"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Roll Number</label>
+          <div class="input-wrap">
+            <span class="ico">🎫</span>
+            <input type="text" id="s-roll" placeholder="e.g. 25F-xxxx"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Email Address <span style="color:var(--text-muted);font-size:0.78rem"></span></label>
+          <div class="input-wrap">
+            <span class="ico">✉️</span>
+            <input type="email" id="s-email" placeholder="your@email.com"/>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="submit-btn" onclick="handleSubmit()">
+          <span class="spinner" id="submit-spinner"></span>
+          <span id="submit-text">Request to Join →</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="state" id="state-success">
+      <div class="form-card success-screen">
+        <div class="success-icon">🎉</div>
+        <h2>Request Submitted!</h2>
+        <p>Your request has been sent to <strong id="success-ta-name" style="color:var(--accent2)">your TA</strong>.<br/>You'll be added once they approve you.</p>
+        <div class="success-steps">
+          <p>✅ <strong>Step 1:</strong> You've submitted your details</p>
+          <p>⏳ <strong>Step 2:</strong> TA reviews and approves your request</p>
+        </div>
+        <div style="margin-top:16px;padding:14px;background:var(--warning-bg);border:1px dashed var(--warning-border);border-radius:var(--radius-md);">
+          <p style="font-size:0.82rem;color:var(--text-primary);line-height:1.6;">
+            📌 <strong>Save this link and your Roll Number</strong> — once approved, come back to this same link anytime and enter your Roll Number to check your marks.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALREADY REGISTERED / STATUS CHECK -->
+    <div class="state" id="state-already">
+      <div class="form-card" style="text-align:center;padding:36px" id="already-content">
+        <div style="font-size:2.5rem;margin-bottom:14px">👋</div>
+        <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:10px">Already Registered!</h2>
+        <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.6">Checking your status...</p>
+      </div>
+    </div>
+
+    <div class="footer-note">Powered by <a href="index.html">Aurelis</a> &nbsp;·&nbsp; Your data is secure 🔒</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL  = 'https://loxxobhsyhqaslpqqrqe.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxveHhvYmhzeWhxYXNscHFxcnFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDMyOTMsImV4cCI6MjA5MDE3OTI5M30.PIBtJi8GkRvmE47-KA0JIuRi8JmpbDAPpxyLN7420gM';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('ta');
+    let taData   = null;
+
+    function showState(id) {
+      document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+      document.getElementById(`state-${id}`).classList.add('active');
+    }
+
+    async function init() {
+      if (!token) { showState('invalid'); return; }
+
+      // ── Call Edge Function securely ──
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/get-ta-by-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`
+        },
+        body: JSON.stringify({ token })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        showState('invalid'); return;
+      }
+
+      taData = data;
+
+      // Fill TA info
+    const initials = data.ta_name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+      const avatarEl = document.getElementById('ta-avatar');
+      if (data.avatar_url) {
+        avatarEl.innerHTML = `<img src="${data.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="${data.ta_name}"/>`;
+      } else {
+        avatarEl.textContent = initials;
+      }
+      document.getElementById('ta-name').textContent        = data.ta_name;
+      document.getElementById('ta-course').textContent      = data.course;
+      document.getElementById('ta-sir').textContent         = data.sir_name;
+      document.getElementById('success-ta-name').textContent = data.ta_name;
+      document.title = `Join ${data.ta_name}'s Class — Aurelis`;
+
+      showState('form');
+    }
+
+    async function handleSubmit() {
+      const name    = document.getElementById('s-name').value.trim();
+      const roll_no = document.getElementById('s-roll').value.trim();
+      const email   = document.getElementById('s-email').value.trim();
+
+      if (!name)    { showAlert('error', '⚠️ Please enter your full name.'); return; }
+      if (!roll_no) { showAlert('error', '⚠️ Please enter your roll number.'); return; }
+
+      setLoading(true);
+      clearAlert();
+
+      if (!taData || !taData.class_id) { showAlert('error', '❌ Could not find class. Please try again.'); setLoading(false); return; }
+
+      // Check duplicate (via secure edge function — anon no longer has
+      // direct SELECT access on the students table)
+      const dupRes = await fetch(`${SUPABASE_URL}/functions/v1/check-roll-taken`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`
+        },
+        body: JSON.stringify({ class_id: taData.class_id, roll_no })
+      });
+      const dupData = await dupRes.json();
+
+      if (dupData.taken) { setLoading(false); showState('already'); checkStatus(roll_no); return; }
+
+      // Insert student
+      const { error } = await sb.from('students').insert({
+        ta_id:    taData.ta_id,
+        class_id: taData.class_id,
+        name,
+        roll_no,
+        email:   email || null,
+        status:  'pending',
+      });
+
+      setLoading(false);
+
+      if (error) {
+        if (error.code === '23505') { showState('already'); checkStatus(roll_no); return; }
+        showAlert('error', '❌ Something went wrong. Please try again.');
+        return;
+      }
+
+      showState('success');
+    }
+
+    // Securely fetches ONLY this one student's status + marks (if the TA
+    // has published them) via the get-student-marks edge function.
+    let currentRollNo = null;
+
+    async function checkStatus(roll_no) {
+      currentRollNo = roll_no;
+      const el = document.getElementById('already-content');
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/get-student-marks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${SUPABASE_ANON}`,
+          },
+          body: JSON.stringify({ class_token: token, roll_no }),
+        });
+        const result = await res.json();
+
+        if (!res.ok || result.error) {
+          el.innerHTML = `
+            <div style="font-size:2.5rem;margin-bottom:14px">👋</div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:10px">Already Registered!</h2>
+            <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.6">You have already submitted a join request.<br/>Please wait for your TA to approve you.</p>`;
+          return;
+        }
+
+        if (result.status === 'pending') {
+          el.innerHTML = `
+            <div style="font-size:2.5rem;margin-bottom:14px">⏳</div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:10px">Still Waiting for Approval</h2>
+            <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.6">Hi ${result.name}! Your TA hasn't approved your request yet. Check back later.</p>`;
+          return;
+        }
+
+        if (result.status === 'rejected') {
+          el.innerHTML = `
+            <div style="font-size:2.5rem;margin-bottom:14px">❌</div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:10px">Request Not Approved</h2>
+            <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.6">Please reach out to your TA directly if you think this is a mistake.</p>`;
+          return;
+        }
+
+        // approved
+        if (!result.marks_visible) {
+          el.innerHTML = `
+            <div style="font-size:2.5rem;margin-bottom:14px">✅</div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:10px">You're Approved!</h2>
+            <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.6">Hi ${result.name}! You're in the class. Your TA hasn't published marks yet — check back later.</p>`;
+          return;
+        }
+
+        const charts = (result.marks || []).map(m => {
+          const pct = v => v === null || v === undefined ? 0 : Math.max(4, Math.min(100, (v / m.total) * 100));
+          const bars = [
+            { label: 'You',     value: m.marks,   color: 'var(--accent)'  },
+            { label: 'Highest', value: m.highest, color: 'var(--accent2)' },
+            { label: 'Average', value: m.average, color: '#D9A441'        },
+            { label: 'Lowest',  value: m.lowest,  color: '#B0A89E'        },
+          ];
+          const queriesHtml = (m.queries || []).map(q => `
+            <div class="query-item">
+              <div class="query-msg">${escapeHtml(q.message)}</div>
+              ${(q.photo_urls||[]).length ? `<div class="query-photos">${q.photo_urls.map(u=>`<a href="${u}" target="_blank"><img src="${u}"/></a>`).join('')}</div>` : ''}
+              <div class="query-meta">${new Date(q.created_at).toLocaleString()}</div>
+              ${q.reply ? `
+                <div style="margin-top:8px;padding:10px;background:var(--surface-elevated);border-left:3px solid var(--brand-secondary);border-radius:var(--radius-sm);">
+                  <div style="font-size:0.68rem;color:var(--brand-secondary);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">TA's Reply</div>
+                  <div style="font-size:0.83rem;">${escapeHtml(q.reply)}</div>
+                </div>` : `<div class="query-meta" style="margin-top:4px;">⏳ Waiting for TA's reply</div>`}
+            </div>`).join('');
+
+          return `
+          <div class="marks-chart-card">
+            <div class="mc-title">${m.name} <span>(/ ${m.total})</span></div>
+            <div class="mc-bars">
+              ${bars.map(b => `
+                <div class="mc-bar-group">
+                  <div class="mc-bar-track"><div class="mc-bar" style="height:${pct(b.value)}%;background:${b.color}"></div></div>
+                  <div class="mc-bar-value">${b.value ?? '—'}</div>
+                  <div class="mc-bar-label">${b.label}</div>
+                </div>`).join('')}
+            </div>
+
+            <div class="query-section">
+              ${queriesHtml ? `<div class="query-list">${queriesHtml}</div>` : ''}
+              <button class="btn-secondary-sm" onclick="toggleQueryForm('${m.category_id}')">💬 Ask a question about this</button>
+              <div class="query-form" id="qform-${m.category_id}" style="display:none;">
+                <textarea id="qmsg-${m.category_id}" placeholder="e.g. Please Check ..." rows="3"></textarea>
+                <input type="file" id="qphotos-${m.category_id}" accept="image/*" multiple style="margin-top:8px;font-size:0.8rem;"/>
+                <button class="btn-submit" style="margin-top:10px;" onclick="submitQuery('${m.category_id}', '${result.student_id}')">Send</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+
+        el.innerHTML = `
+          <div style="font-size:2.5rem;margin-bottom:14px">📊</div>
+          <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:6px">Your Marks</h2>
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">${result.name}</p>
+          <div style="text-align:left;">
+            ${charts || '<p style="font-size:0.85rem;color:var(--text-muted);text-align:center;">No marks entered yet.</p>'}
+          </div>`;
+      } catch (err) {
+        el.innerHTML = `
+          <div style="font-size:2.5rem;margin-bottom:14px">👋</div>
+          <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:10px">Already Registered!</h2>
+          <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.6">You have already submitted a join request.<br/>Please wait for your TA to approve you.</p>`;
+      }
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function toggleQueryForm(categoryId) {
+      const el = document.getElementById(`qform-${categoryId}`);
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function submitQuery(categoryId, studentId) {
+      const msgEl = document.getElementById(`qmsg-${categoryId}`);
+      const fileEl = document.getElementById(`qphotos-${categoryId}`);
+      const message = msgEl.value.trim();
+      if (!message) { alert('Please write your question first.'); return; }
+
+      const photoUrls = [];
+      const files = fileEl.files;
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const path = `${categoryId}/${studentId}-${Date.now()}-${i}.${file.name.split('.').pop()}`;
+        const { error: upErr } = await sb.storage.from('mark-query-photos').upload(path, file);
+        if (!upErr) {
+          const { data: urlData } = sb.storage.from('mark-query-photos').getPublicUrl(path);
+          photoUrls.push(urlData.publicUrl);
+        }
+      }
+
+      const { error } = await sb.from('mark_queries').insert({
+        student_id: studentId,
+        category_id: categoryId,
+        ta_id: taData.ta_id,
+        message,
+        photo_urls: photoUrls,
+      });
+
+      if (error) { alert('Failed to send. Please try again.'); return; }
+
+      msgEl.value = '';
+      fileEl.value = '';
+      document.getElementById(`qform-${categoryId}`).style.display = 'none';
+      checkStatus(currentRollNo);
+    }
+
+    function showAlert(type, msg) {
+      const el = document.getElementById('form-alert');
+      el.className = `alert ${type}`;
+      el.textContent = msg;
+    }
+    function clearAlert() {
+      const el = document.getElementById('form-alert');
+      el.className = 'alert';
+      el.textContent = '';
+    }
+    function setLoading(on) {
+      document.getElementById('submit-btn').disabled          = on;
+      document.getElementById('submit-spinner').style.display = on ? 'block' : 'none';
+      document.getElementById('submit-text').style.opacity    = on ? 0.4 : 1;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && document.getElementById('state-form').classList.contains('active')) handleSubmit();
+    });
+
+    init();
+  </script>
+</body>
+</html>

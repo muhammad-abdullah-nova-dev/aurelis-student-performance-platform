@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Aurelis — Teaching Assistant Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ── DESIGN TOKENS ── */
+  :root{
+    /* Brand */
+    --brand-primary:        #C63D2F;
+    --brand-primary-hover:  #B03527;
+    --brand-primary-active: #9E2E22;
+    --brand-secondary:      #3E7A54;
+    --brand-accent:         #D9A441;
+
+    /* Surface */
+    --background:       #F7F1E8;
+    --surface:          #EFE6D4;
+    --surface-elevated: #FDFAF5;
+    --surface-muted:    #EAE0CE;
+
+    /* Alias for legacy refs */
+    --paper:  var(--background);
+    --paper2: var(--surface);
+    --card:   var(--surface-elevated);
+    --red:    var(--brand-primary);
+    --red-dark: var(--brand-primary-active);
+    --pine:   var(--brand-secondary);
+    --gold:   var(--brand-accent);
+
+    /* Text */
+    --text-primary:   #1E1A17;
+    --text-secondary: #4A3F36;
+    --text-muted:     #7A6E64;
+    --text-disabled:  #B0A89E;
+    --text-inverse:   #FDFAF5;
+
+    /* Alias */
+    --ink:      var(--text-primary);
+    --ink-soft: var(--text-muted);
+
+    /* Border */
+    --border:        #DDD4C0;
+    --border-subtle: #EAE0CE;
+    --border-strong: #C4B99E;
+    --line:          var(--border);
+
+    /* Status */
+    --success:        #2E6B45;
+    --success-bg:     rgba(46,107,69,0.08);
+    --success-border: rgba(46,107,69,0.25);
+    --warning:        #B8832A;
+    --warning-bg:     rgba(217,164,65,0.10);
+    --warning-border: rgba(217,164,65,0.30);
+    --danger:         #C63D2F;
+    --danger-bg:      rgba(198,61,47,0.08);
+    --danger-border:  rgba(198,61,47,0.25);
+    --info:           #2E5B8A;
+    --info-bg:        rgba(46,91,138,0.08);
+    --info-border:    rgba(46,91,138,0.25);
+
+    /* Shadow */
+    --shadow-xs: 0 1px 3px rgba(30,26,23,0.08);
+    --shadow-sm: 0 2px 8px rgba(30,26,23,0.08), 0 1px 3px rgba(30,26,23,0.05);
+    --shadow-md: 0 4px 16px rgba(30,26,23,0.10), 0 2px 6px rgba(30,26,23,0.06);
+    --shadow-lg: 0 8px 32px rgba(30,26,23,0.12), 0 4px 12px rgba(30,26,23,0.07);
+
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    background:var(--background);
+    color:var(--text-primary);
+    overflow-x:hidden;
+    /* Refined dot grid — more subtle, crisp */
+    background-image: radial-gradient(circle, rgba(30,26,23,0.055) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  ::selection{ background:var(--brand-accent); color:var(--text-primary); }
+
+  .hand{ font-family:'Caveat',cursive; }
+
+  /* ── NAV ── */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 6%;
+    height: 68px;
+    background:rgba(253,250,245,0.95);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(30,26,23,0.04);
+  }
+  .logo{
+    font-family:'Fraunces',serif; font-weight:800; font-size:1.5rem;
+    letter-spacing:-0.6px; color:var(--text-primary);
+  }
+  .logo span{ 
+    color:var(--brand-primary);
+    background: linear-gradient(135deg, var(--brand-primary), var(--danger));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .nav-links{ display:flex; gap:36px; list-style:none; }
+  .nav-links a{
+    color:var(--text-secondary); text-decoration:none;
+    font-size:0.9rem; font-weight:600;
+    transition:color 0.2s;
+    letter-spacing:0.01em;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--brand-primary);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover{ color:var(--brand-primary); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta{
+    background:linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
+    color:var(--text-inverse);
+    padding:10px 24px; border-radius:var(--radius-md);
+    text-decoration:none; font-size:0.9rem; font-weight:700;
+    letter-spacing:0.01em;
+    transition:all 0.2s;
+    border:1px solid transparent;
+    box-shadow: 0 3px 0 var(--brand-primary-active), 0 4px 12px rgba(198,61,47,0.25);
+  }
+  .nav-cta:hover{ 
+    transform:translateY(-2px);
+    box-shadow: 0 3px 0 var(--brand-primary-active), 0 6px 18px rgba(198,61,47,0.35);
+  }
+
+  /* ── HERO ── */
+  .hero{
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:grid; grid-template-columns:1.1fr 0.9fr; align-items:center; gap:48px;
+    padding:100px 6% 70px;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:0.78rem; font-weight:700; color:var(--brand-primary);
+    margin-bottom:20px; animation:fadeUp 0.6s ease both;
+    text-transform:uppercase; letter-spacing:2px;
+    border:1px solid var(--danger-border);
+    background:var(--danger-bg);
+    padding:5px 12px; border-radius:100px;
+  }
+  .eyebrow::before{ content:''; display:none; }
+
+  .hero h1{
+    font-family:'Fraunces',serif;
+    font-size:clamp(2.6rem, 4.4vw, 4rem);
+    font-weight:800;
+    line-height:1.08;
+    letter-spacing:-0.9px;
+    max-width:600px;
+    color:var(--text-primary);
+    animation:fadeUp 0.7s 0.08s ease both;
+  }
+  .hero h1 .mark{
+    position:relative; white-space:nowrap;
+  }
+  .hero h1 .mark svg{
+    position:absolute; left:-4%; top:8%; width:108%; height:90%;
+    z-index:-1;
+  }
+  .hero h1 .mark path{
+    fill:none; stroke:var(--brand-accent); stroke-width:12; stroke-linecap:round;
+    opacity:0.5;
+  }
+
+  .hero p{
+    margin-top:20px; font-size:1.02rem; color:var(--text-secondary);
+    max-width:460px; line-height:1.75;
+    animation:fadeUp 0.7s 0.16s ease both;
+  }
+
+  .hero-btns{ display:flex; gap:12px; margin-top:32px; flex-wrap:wrap; animation:fadeUp 0.7s 0.24s ease both; }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
+    color:#fff;
+    padding:14px 30px; border-radius:var(--radius-md);
+    text-decoration:none; font-weight:800; font-size:0.95rem;
+    box-shadow:0 4px 0 var(--brand-primary-active), 0 6px 16px rgba(198,61,47,0.3);
+    transition:transform 0.2s, box-shadow 0.2s;
+    letter-spacing:0.02em;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  .btn-primary:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+  .btn-primary:hover{ 
+    transform:translateY(-3px); 
+    box-shadow:0 4px 0 var(--brand-primary-active), 0 8px 20px rgba(198,61,47,0.4);
+  }
+  .btn-primary:active{ 
+    transform:translateY(1px); 
+    box-shadow:0 2px 0 var(--brand-primary-active), 0 3px 8px rgba(198,61,47,0.3);
+  }
+  .btn-secondary{
+    background:var(--surface-elevated); color:var(--text-primary);
+    padding:14px 30px; border-radius:var(--radius-md);
+    text-decoration:none; font-weight:700; font-size:0.95rem;
+    border:1px solid var(--border);
+    transition:all 0.2s;
+    letter-spacing:0.02em;
+    box-shadow: var(--shadow-xs);
+  }
+  .btn-secondary:hover{ 
+    background:var(--surface); 
+    border-color:var(--border-strong);
+    transform:translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .hero-stats{
+    display:flex; gap:0; margin-top:48px;
+    animation:fadeUp 0.7s 0.3s ease both;
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    background:var(--surface-elevated);
+    overflow:hidden;
+    width:fit-content;
+    box-shadow:var(--shadow-xs);
+  }
+  .hero-stats > div{
+    padding:16px 28px;
+    border-right:1px solid var(--border);
+  }
+  .hero-stats > div:last-child{ border-right:none; }
+  .hstat-num{ font-family:'Fraunces',serif; font-size:1.5rem; font-weight:700; color:var(--brand-secondary); line-height:1; }
+  .hstat-label{ font-size:0.74rem; color:var(--text-muted); margin-top:4px; font-weight:500; letter-spacing:0.02em; }
+
+  /* ── HERO CARD ── */
+  .hero-visual{ position:relative; display:flex; justify-content:center; animation:fadeUp 0.8s 0.2s ease both; }
+  .tape{
+    position:absolute; top:-14px; left:50%; transform:translateX(-50%) rotate(-1.5deg);
+    width:80px; height:26px;
+    background:rgba(217,164,65,0.45);
+    border:1px solid rgba(217,164,65,0.65);
+    border-radius:2px;
+    z-index:3;
+  }
+  .gradebook-card{
+    position:relative; z-index:2;
+    background:var(--surface-elevated);
+    width:100%; max-width:340px;
+    border-radius:var(--radius-md);
+    padding:28px 24px 24px;
+    box-shadow:var(--shadow-lg);
+    transform:rotate(1.8deg);
+    border:1px solid var(--border);
+  }
+  .gb-head{
+    font-family:'Fraunces',serif; font-size:1rem; font-weight:700;
+    border-bottom:1.5px solid var(--text-primary);
+    padding-bottom:10px; margin-bottom:12px;
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .gb-head span{ font-size:0.72rem; color:var(--text-muted); font-weight:400; font-family:'Plus Jakarta Sans',sans-serif; }
+  .gb-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 0; border-bottom:1px solid var(--border-subtle); font-size:0.86rem;
+  }
+  .gb-row:last-of-type{ border-bottom:none; }
+  .gb-name{ font-weight:600; color:var(--text-primary); }
+  .gb-roll{ color:var(--text-muted); font-size:0.75rem; margin-top:2px; }
+  .gb-score{ font-family:'Fraunces',serif; font-weight:700; color:var(--brand-secondary); font-size:1rem; }
+  .stamp{
+    position:absolute; top:14px; right:-28px; z-index:4;
+    border:2.5px solid var(--brand-secondary); color:var(--brand-secondary);
+    border-radius:50%; width:68px; height:68px;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; font-family:'Fraunces',serif; font-weight:700; font-size:0.65rem;
+    transform:rotate(14deg); letter-spacing:1px;
+    background:rgba(62,122,84,0.07);
+    animation:popIn 0.5s 1.1s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes popIn{ from{ transform:scale(0) rotate(-15deg) rotate(14deg); opacity:0;} to{ transform:scale(1) rotate(14deg); opacity:1; } }
+
+  /* ── SECTION SHARED ── */
+  section{ position:relative; z-index:1; }
+  .section-tag{
+    font-size:0.72rem; font-weight:700;
+    color:var(--brand-primary);
+    margin-bottom:10px;
+    display:inline-block;
+    text-transform:uppercase;
+    letter-spacing:2.5px;
+    border:1px solid var(--danger-border);
+    background:var(--danger-bg);
+    padding:4px 12px; border-radius:100px;
+  }
+  .section-title{
+    font-family:'Fraunces',serif;
+    font-size:clamp(1.6rem,3.2vw,2.3rem);
+    font-weight:700; letter-spacing:-0.4px;
+    max-width:520px; line-height:1.18;
+    color:var(--text-primary);
+  }
+  .divider{
+    border:none; height:0; margin:0 6%;
+    border-top:1px solid var(--border);
+  }
+
+  /* ── FEATURES ── */
+  .features{ padding:96px 6% 88px; }
+  .features-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+    gap:18px; margin-top:48px;
+  }
+  .feature-card{
+    background:var(--surface-elevated);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:30px 28px;
+    transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position:relative;
+    box-shadow: var(--shadow-xs);
+  }
+  /* Enterprise: no rotation */
+  .feature-card:nth-child(odd){ transform:none; }
+  .feature-card:nth-child(even){ transform:none; }
+  .feature-card:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-lg);
+    border-color:var(--border-strong);
+  }
+  .feature-card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:4px;
+    background:linear-gradient(90deg, var(--brand-primary), var(--brand-secondary));
+    border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+    opacity:0; transition:opacity 0.3s;
+  }
+  .feature-card:hover::before{ opacity:1; }
+  .feature-icon{
+    width:48px; height:48px; border-radius:var(--radius-md);
+    background:var(--danger-bg); border:1px solid var(--danger-border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; margin-bottom:18px;
+    box-shadow: var(--shadow-xs);
+    transition: transform 0.3s;
+  }
+  .feature-card:hover .feature-icon {
+    transform: scale(1.08);
+  }
+  .feature-card h3{
+    font-family:'Fraunces',serif; font-size:1.08rem; font-weight:800;
+    margin-bottom:10px; color:var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  .feature-card p{ 
+    font-size:0.88rem; 
+    color:var(--text-secondary); 
+    line-height:1.7;
+    font-weight: 500;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how{ padding:88px 6% 96px; background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .how-head{ text-align:center; }
+  .how-head .section-title{ margin:0 auto; }
+  .steps{
+    display:flex; justify-content:space-between; gap:14px;
+    margin-top:56px; position:relative; flex-wrap:wrap;
+  }
+  .steps::before{
+    content:''; position:absolute; top:28px; left:8%; right:8%; height:0;
+    border-top:1.5px dashed var(--border-strong); z-index:0;
+  }
+  .step{ flex:1; min-width:140px; text-align:center; position:relative; z-index:1; }
+  .step-num{
+    width:60px; height:60px; border-radius:50%;
+    background:var(--surface-elevated);
+    border:3px solid var(--brand-primary);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-size:1.2rem; font-weight:900; color:var(--brand-primary);
+    margin:0 auto 18px;
+    box-shadow:var(--shadow-md);
+    transition: transform 0.3s;
+  }
+  .step:hover .step-num {
+    transform: scale(1.1) rotate(5deg);
+  }
+  .step h4{ 
+    font-family:'Fraunces',serif; 
+    font-size:1rem; 
+    font-weight:800; 
+    margin-bottom:9px; 
+    color:var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  .step p{ 
+    font-size:0.85rem; 
+    color:var(--text-secondary); 
+    line-height:1.7; 
+    max-width:180px; 
+    margin:0 auto;
+    font-weight: 500;
+  }
+
+  /* ── CTA ── */
+  .cta-section{ padding:40px 6% 100px; text-align:center; }
+  .cta-box{
+    background:var(--text-primary); color:var(--text-inverse);
+    border-radius:var(--radius-xl); padding:64px 40px;
+    max-width:660px; margin:0 auto;
+    position:relative; overflow:hidden;
+    box-shadow:var(--shadow-lg);
+  }
+  .cta-box::after{
+    content:'✓'; position:absolute; font-family:'Fraunces',serif; font-size:13rem;
+    right:-20px; bottom:-50px; opacity:0.05; color:var(--text-inverse); font-weight:700;
+    pointer-events:none;
+  }
+  .cta-box h2{
+    font-family:'Fraunces',serif;
+    font-size:clamp(1.6rem,3.4vw,2.2rem); font-weight:700;
+    margin-bottom:12px; letter-spacing:-0.4px;
+  }
+  .cta-box p{ color:rgba(253,250,245,0.70); font-size:1rem; margin-bottom:30px; line-height:1.65; position:relative; }
+  .cta-box .btn-primary{ box-shadow:0 3px 0 var(--brand-primary-active); position:relative; }
+
+  /* ── FOOTER ── */
+  footer{
+    padding:26px 6%; border-top:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    color:var(--text-muted); font-size:0.83rem; flex-wrap:wrap; gap:10px;
+    background:var(--surface);
+  }
+  footer a{ color:var(--text-secondary); text-decoration:none; transition:color 0.15s; }
+  footer a:hover{ color:var(--brand-primary); }
+
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(22px);} to{opacity:1; transform:translateY(0);} }
+  .reveal{ opacity:0; transform:translateY(22px); transition:opacity 0.55s ease, transform 0.55s ease; }
+  .reveal.visible{ opacity:1; transform:translateY(0); }
+
+  @media (max-width:900px){
+    .hero{ grid-template-columns:1fr; text-align:center; padding-top:100px; }
+    .hero p{ margin-left:auto; margin-right:auto; }
+    .hero-btns, .hero-stats{ justify-content:center; }
+    .hero-visual{ margin-top:20px; }
+    .hero-stats{ width:auto; }
+    .hero-stats > div{ padding:14px 20px; }
+  }
+  @media (max-width:640px){
+    .nav-links{ display:none; }
+    .steps::before{ display:none; }
+    .steps{ flex-direction:column; gap:30px; }
+    footer{ flex-direction:column; text-align:center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Aure<span>lis</span></div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="login.html" class="nav-cta">Login / Sign Up</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="eyebrow">Built for Teaching Assistants</div>
+    <h1>Grading shouldn't feel like <span class="mark">homework<svg viewBox="0 0 220 40" preserveAspectRatio="none"><path d="M4,30 C60,14 160,14 216,26"/></svg></span></h1>
+    <p>Aurelis keeps your roster, marks, and Google Sheet in sync — so the only thing left to do is teach.</p>
+    <div class="hero-btns">
+      <a href="login.html" class="btn-primary">Get Started Free →</a>
+      <a href="#how" class="btn-secondary">See How It Works</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hstat-num">Free</div><div class="hstat-label">No cost, ever</div></div>
+      <div><div class="hstat-num">Live</div><div class="hstat-label">Sheets sync</div></div>
+      <div><div class="hstat-num">Yours</div><div class="hstat-label">You approve who joins</div></div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="tape"></div>
+    <div class="gradebook-card">
+      <div class="gb-head">Quiz 3<span>/ 20</span></div>
+      <div class="gb-row"><div><div class="gb-name">Ahmad </div><div class="gb-roll">25F-0XXX</div></div><div class="gb-score">18</div></div>
+      <div class="gb-row"><div><div class="gb-name">Usman </div><div class="gb-roll">25F-0XXX</div></div><div class="gb-score">16</div></div>
+      <div class="gb-row"><div><div class="gb-name">Zainab </div><div class="gb-roll">25F-0XXX</div></div><div class="gb-score">19</div></div>
+      <div class="stamp">SYNCED<br/>✓</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="reveal">
+    <div class="section-tag">What's inside</div>
+    <h2 class="section-title">Everything a TA actually needs</h2>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">📊</div>
+      <h3>Marks that sync themselves</h3>
+      <p>Type a mark in the portal and it lands in your Google Sheet automatically. No exporting, no copy-pasting.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🔗</div>
+      <h3>One link for your whole class</h3>
+      <p>Share a single invite link. Students see your name and your Sir's name, then enter their own roll number.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">✅</div>
+      <h3>You decide who's in</h3>
+      <p>Every student who registers waits for your approval before they land on your roster — no surprises.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🔔</div>
+      <h3>Nobody falls through the cracks</h3>
+      <p>Keep track of who's missing marks or attendance, without digging through a spreadsheet to find them.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🗄️</div>
+      <h3>Stored safely, always there</h3>
+      <p>Every roster, mark, and record lives securely in the cloud — open your dashboard from any device.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">👤</div>
+      <h3>Your class, clearly labelled</h3>
+      <p>Your name and your Sir's name show right on the join page, so students always know whose class it is.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="reveal how-head">
+    <div class="section-tag">The flow</div>
+    <h2 class="section-title">Five steps, then you're done</h2>
+  </div>
+
+  <div class="steps">
+    <div class="step reveal">
+      <div class="step-num">1</div>
+      <h4>Sign up</h4>
+      <p>Add your name, your Sir's name, and your course.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">2</div>
+      <h4>Share your link</h4>
+      <p>Send your class its own invite link.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">3</div>
+      <h4>Students register</h4>
+      <p>They enter their roll number and name.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">4</div>
+      <h4>You approve</h4>
+      <p>Only the students you confirm make the roster.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">5</div>
+      <h4>Enter & sync</h4>
+      <p>Marks go straight to your Google Sheet.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-box reveal">
+    <h2>Ready to close the spreadsheet tabs?</h2>
+    <p>Set up your class in under two minutes — and spend the time you save actually helping your students.</p>
+    <a href="login.html" class="btn-primary">Create Your Free Account →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div class="logo">Aure<span>lis</span></div>
+  <div>Built with ❤️ by Maqsad Tech</div>
+  <div style="font-size:0.85rem;">
+    📧 <a href="mailto:muhammed.abdullah.coder@gmail.com">muhammed.abdullah.coder@gmail.com</a>
+    &nbsp;·&nbsp;
+    💬 <a href="https://wa.me/923226334814" target="_blank">+92 322 6334814</a>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

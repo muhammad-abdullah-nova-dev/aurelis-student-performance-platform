@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Aurelis — Class Progress</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ── DESIGN TOKENS ── */
+  :root {
+    --brand-primary:          #C63D2F;
+    --brand-primary-hover:    #B03527;
+    --brand-primary-active:   #9E2E22;
+    --brand-secondary:        #3E7A54;
+    --brand-secondary-active: #2C5A3F;
+    --brand-accent:           #D9A441;
+
+    --background:       #F7F1E8;
+    --surface:          #EFE6D4;
+    --surface-elevated: #FDFAF5;
+    --surface-muted:    #EAE0CE;
+
+    --text-primary:   #1E1A17;
+    --text-secondary: #4A3F36;
+    --text-muted:     #7A6E64;
+    --text-disabled:  #B0A89E;
+    --text-inverse:   #FDFAF5;
+
+    --border:        #DDD4C0;
+    --border-subtle: #EAE0CE;
+    --border-strong: #C4B99E;
+
+    --success:        #2E6B45;
+    --success-bg:     rgba(46,107,69,0.08);
+    --success-border: rgba(46,107,69,0.25);
+    --warning:        #B8832A;
+    --warning-bg:     rgba(217,164,65,0.10);
+    --warning-border: rgba(217,164,65,0.30);
+    --danger:         #C63D2F;
+    --danger-bg:      rgba(198,61,47,0.08);
+    --danger-border:  rgba(198,61,47,0.25);
+    --info:           #2E5B8A;
+    --info-bg:        rgba(46,91,138,0.08);
+    --info-border:    rgba(46,91,138,0.25);
+
+    --shadow-xs: 0 1px 3px rgba(30,26,23,0.08);
+    --shadow-sm: 0 2px 8px rgba(30,26,23,0.08), 0 1px 3px rgba(30,26,23,0.05);
+    --shadow-md: 0 4px 16px rgba(30,26,23,0.10), 0 2px 6px rgba(30,26,23,0.06);
+    --shadow-lg: 0 8px 32px rgba(30,26,23,0.12), 0 4px 12px rgba(30,26,23,0.07);
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+
+    /* Legacy aliases — no circular refs */
+    --bg: var(--background);
+    --card: var(--surface-elevated); --card2: var(--surface-muted);
+    --accent: var(--brand-primary); --accent2: var(--brand-secondary);
+    --warn: var(--brand-accent); --text: var(--text-primary);
+    --muted: var(--text-muted);
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    background:var(--background); color:var(--text-primary);
+    min-height:100vh; padding:32px 20px;
+    background-image: radial-gradient(circle, rgba(30,26,23,0.055) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .wrap{ max-width:820px; margin:0 auto; }
+
+  /* ── LOGO ── */
+  .logo{
+    text-align:center; font-family:'Fraunces',serif;
+    font-size:1.4rem; font-weight:700; margin-bottom:20px;
+    color: var(--text-primary); letter-spacing: -0.3px;
+  }
+  .logo span{ color:var(--brand-primary); }
+
+  /* ── HEADER CARD ── */
+  .header-card{
+    background:var(--surface-elevated);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:26px; text-align:center; margin-bottom:18px;
+    position:relative; overflow:hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .header-card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--brand-primary);
+  }
+  .header-card h1{
+    font-family:'Fraunces',serif; font-size:1.45rem; font-weight:700;
+    color: var(--text-primary); letter-spacing: -0.3px;
+  }
+  .header-card p{ color:var(--text-muted); font-size:0.875rem; margin-top:6px; }
+  .badge{
+    display:inline-block; font-size:0.68rem; text-transform:uppercase;
+    letter-spacing:2px; color:var(--brand-primary); font-weight:700;
+    margin-bottom:8px;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    padding: 3px 12px; border-radius: 100px;
+  }
+
+  /* ── STATS ROW ── */
+  .stats-row{
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:12px; margin-bottom:18px;
+  }
+  .stat{
+    background:var(--surface-elevated); border:1px solid var(--border);
+    border-radius:var(--radius-md); padding:16px; text-align:center;
+    box-shadow: var(--shadow-xs);
+  }
+  .stat .num{
+    font-family:'Fraunces',serif; font-size:1.75rem; font-weight:800;
+    color:var(--brand-secondary);
+  }
+  .stat .lbl{ font-size:0.75rem; color:var(--text-muted); margin-top:4px; font-weight:500; letter-spacing:0.02em; }
+
+  /* ── CATEGORY NAVIGATION PILLS ── */
+  .jump-wrap{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:20px; }
+  .jump-pill{
+    background:var(--surface-elevated); border:1px solid var(--border);
+    border-radius:100px; padding:7px 16px;
+    font-size:0.82rem; font-weight:600; cursor:pointer;
+    transition:background 0.18s, border-color 0.18s, color 0.18s;
+    color: var(--text-secondary);
+  }
+  .jump-pill:hover{ border-color:var(--brand-primary); color:var(--brand-primary); background: var(--danger-bg); }
+  .jump-pill.active{
+    background:var(--brand-primary); border-color:var(--brand-primary);
+    color:#fff;
+  }
+
+  /* ── QUIZ SECTIONS ── */
+  .quiz-section{ display:none; }
+  .quiz-section.active{ display:block; }
+  .card{
+    background:var(--surface-elevated); border:1px solid var(--border);
+    border-radius:var(--radius-lg); padding:22px; margin-bottom:16px;
+    box-shadow: var(--shadow-xs);
+  }
+  .card h2{
+    font-family:'Fraunces',serif; font-size:1.1rem; font-weight:700;
+    margin-bottom:4px; color: var(--text-primary); letter-spacing: -0.2px;
+  }
+  .card .sub{ font-size:0.78rem; color:var(--text-muted); margin-bottom:16px; }
+
+  /* ── MINI STATS ── */
+  .mini-stats{
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:10px; margin-bottom:18px;
+  }
+  .mini-stat{
+    background:var(--surface); border:1px solid var(--border-subtle);
+    border-radius:var(--radius-md); padding:12px; text-align:center;
+  }
+  .mini-stat .v{
+    font-family:'Fraunces',serif; font-weight:700; font-size:1.1rem;
+    color: var(--text-primary);
+  }
+  .mini-stat .l{ font-size:0.68rem; color:var(--text-muted); margin-top:3px; font-weight:500; }
+
+  /* ── DISTRIBUTION BAR ── */
+  .dist-bar{
+    display:flex; height:22px; border-radius:var(--radius-sm);
+    overflow:hidden; margin-bottom:6px;
+    border: 1px solid var(--border-subtle);
+  }
+  .dist-above{ background:var(--brand-secondary); }
+  .dist-below{ background:var(--brand-accent); }
+  .dist-labels{
+    display:flex; justify-content:space-between;
+    font-size:0.73rem; color:var(--text-muted); margin-bottom:18px;
+  }
+
+  /* ── TOP/BOTTOM LISTS ── */
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:18px; }
+  .mini-list-title{
+    font-size:0.78rem; font-weight:700; margin-bottom:8px;
+    text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted);
+  }
+  .mini-row{
+    display:flex; justify-content:space-between;
+    font-size:0.84rem; padding:6px 0;
+    border-bottom:1px solid var(--border-subtle);
+    color: var(--text-primary);
+  }
+  .mini-row:last-child{ border-bottom:none; }
+
+  /* ── FULL LIST ── */
+  .full-list-toggle{
+    background:transparent;
+    border:1px dashed var(--border-strong);
+    color:var(--text-muted); padding:8px 14px;
+    border-radius:var(--radius-sm); font-size:0.79rem;
+    cursor:pointer; width:100%;
+    transition: border-color 0.18s, color 0.18s;
+  }
+  .full-list-toggle:hover{ border-color:var(--brand-primary); color:var(--brand-primary); }
+  .full-list{
+    display:none; margin-top:12px;
+    max-height:300px; overflow-y:auto;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+  }
+  .full-row{
+    display:flex; justify-content:space-between;
+    font-size:0.84rem; padding:9px 12px;
+    border-bottom:1px solid var(--border-subtle);
+    color: var(--text-primary);
+  }
+  .full-row:last-child{ border-bottom:none; }
+
+  /* ── RANK BADGES ── */
+  .rank{
+    width:20px; height:20px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:0.66rem; font-weight:700; margin-right:7px; flex-shrink:0;
+  }
+  .rank-top{ background:var(--success-bg); color:var(--success); border:1px solid var(--success-border); }
+  .rank-bottom{ background:var(--danger-bg); color:var(--danger); border:1px solid var(--danger-border); }
+
+  /* ── LOADING / ERROR ── */
+  .loading, .error-state{
+    text-align:center; padding:60px 20px; color:var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .error-state{ display:none; }
+
+  @media(max-width:600px){
+    .two-col{ grid-template-columns:1fr; }
+    .mini-stats,.stats-row{ grid-template-columns:1fr 1fr; }
+  }
+</style>
+
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">Aure<span>lis</span> — Class Progress</div>
+
+    <div class="loading" id="loading">Loading class data...</div>
+    <div class="error-state" id="error-state">
+      <p>This link looks invalid or has expired. Please ask the TA for a new one.</p>
+    </div>
+
+    <div id="content" style="display:none;">
+      <div class="header-card">
+        <div class="badge">Read-only view for teachers</div>
+        <h1 id="class-name">—</h1>
+        <p>TA: <strong id="ta-name">—</strong></p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat"><div class="num" id="total-students">—</div><div class="lbl">Total Students</div></div>
+        <div class="stat"><div class="num" id="graded-students">—</div><div class="lbl">Have Marks</div></div>
+        <div class="stat"><div class="num" id="class-average">—</div><div class="lbl">Overall Average</div></div>
+      </div>
+
+      <div class="jump-wrap" id="jump-wrap"></div>
+      <div id="quiz-sections"></div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL  = 'https://loxxobhsyhqaslpqqrqe.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxveHhvYmhzeWhxYXNscHFxcnFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDMyOTMsImV4cCI6MjA5MDE3OTI5M30.PIBtJi8GkRvmE47-KA0JIuRi8JmpbDAPpxyLN7420gM';
+
+  function showQuiz(id) {
+    document.querySelectorAll('.quiz-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.jump-pill').forEach(p => p.classList.remove('active'));
+    document.getElementById(`quiz-${id}`).classList.add('active');
+    document.getElementById(`pill-${id}`).classList.add('active');
+    window.scrollTo({ top: document.getElementById('jump-wrap').offsetTop - 10, behavior: 'smooth' });
+  }
+
+  function toggleFullList(id) {
+    const el = document.getElementById(`full-${id}`);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function miniRow(s, i, kind) {
+    return `<div class="mini-row"><span><span class="rank ${kind==='top'?'rank-top':'rank-bottom'}">${i+1}</span>${s.name}</span><strong>${s.marks}</strong></div>`;
+  }
+
+  function renderQuizSection(q, index) {
+    const distTotal = q.above_avg_pct + q.below_avg_pct || 1;
+    return `
+    <div class="quiz-section ${index===0?'active':''}" id="quiz-${q.id}">
+      <div class="card">
+        <h2>${q.name}</h2>
+        <div class="sub">Out of ${q.total} · ${q.graded_count} student(s) graded</div>
+
+        <div class="mini-stats">
+          <div class="mini-stat"><div class="v">${q.average ?? '—'}</div><div class="l">Class Average</div></div>
+          <div class="mini-stat"><div class="v">${q.highest ?? '—'}</div><div class="l">Highest</div></div>
+          <div class="mini-stat"><div class="v">${q.lowest ?? '—'}</div><div class="l">Lowest</div></div>
+        </div>
+
+        ${q.graded_count ? `
+        <div class="dist-bar">
+          <div class="dist-above" style="width:${(q.above_avg_pct/distTotal)*100}%"></div>
+          <div class="dist-below" style="width:${(q.below_avg_pct/distTotal)*100}%"></div>
+        </div>
+        <div class="dist-labels">
+          <span>🟢 ${q.above_avg_pct}% at or above average</span>
+          <span>🟡 ${q.below_avg_pct}% below average</span>
+        </div>` : ''}
+
+        <div class="two-col">
+          <div>
+            <div class="mini-list-title">🏆 Top 5</div>
+            ${q.top5.length ? q.top5.map((s,i)=>miniRow(s,i,'top')).join('') : '<p style="color:var(--text-muted);font-size:0.83rem;">No marks yet.</p>'}
+          </div>
+          <div>
+            <div class="mini-list-title">📉 Bottom 5</div>
+            ${q.bottom5.length ? q.bottom5.map((s,i)=>miniRow(s,i,'bottom')).join('') : '<p style="color:var(--text-muted);font-size:0.83rem;">No marks yet.</p>'}
+          </div>
+        </div>
+
+        <button class="full-list-toggle" onclick="toggleFullList('${q.id}')">📋 View all ${q.graded_count} students</button>
+        <div class="full-list" id="full-${q.id}">
+          ${q.all.map(s => `<div class="full-row"><span>${s.name} <span style="color:var(--text-muted);font-size:0.78rem;">(${s.roll_no})</span></span><strong>${s.marks}</strong></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  (async () => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (!token) { document.getElementById('loading').style.display='none'; document.getElementById('error-state').style.display='block'; return; }
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/get-teacher-dashboard`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Failed');
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+
+      document.getElementById('class-name').textContent = data.class_name;
+      document.getElementById('ta-name').textContent     = data.ta_name || '—';
+      document.getElementById('total-students').textContent  = data.total_students;
+      document.getElementById('graded-students').textContent = data.graded_students;
+      document.getElementById('class-average').textContent   = data.class_average !== null ? data.class_average + '%' : '—';
+
+      const quizzes = data.quizzes || [];
+      if (!quizzes.length) {
+        document.getElementById('jump-wrap').innerHTML = '';
+        document.getElementById('quiz-sections').innerHTML = '<div class="card"><p style="color:var(--text-muted);text-align:center;">No quizzes or assignments added yet.</p></div>';
+        return;
+      }
+
+      document.getElementById('jump-wrap').innerHTML = quizzes.map((q,i) =>
+        `<button class="jump-pill ${i===0?'active':''}" id="pill-${q.id}" onclick="showQuiz('${q.id}')">${q.name}</button>`
+      ).join('');
+
+      document.getElementById('quiz-sections').innerHTML = quizzes.map((q,i) => renderQuizSection(q,i)).join('');
+    } catch (err) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-state').style.display = 'block';
+    }
+  })();
+</script>
+</body>
+</html>
