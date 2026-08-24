@@ -16,7 +16,11 @@
 -- ============================================================
 
 -- Enable required extensions
-create extension if not exists "pgcrypto";
+-- pgcrypto provides: gen_random_bytes() (used in generate_class_token)
+--                    gen_random_uuid()  (used as DEFAULT on all id columns)
+-- schema => extensions keeps the extension out of public and is the
+-- Supabase-recommended form; functions remain callable from all schemas.
+create extension if not exists pgcrypto schema extensions;
 
 -- ============================================================
 -- CORE TABLES
