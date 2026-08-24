@@ -196,7 +196,7 @@ returns text
 language sql 
 stable 
 as $$
-  select encode(gen_random_bytes(16), 'hex');
+  select encode(extensions.gen_random_bytes(16), 'hex');
 $$;
 
 comment on function public.generate_class_token() is 'Generates secure random token for class_link_token and teacher_view_token';
