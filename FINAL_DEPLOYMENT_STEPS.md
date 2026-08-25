@@ -1,3 +1,51 @@
+# ✅ Final Deployment Steps
+
+## Status: ALMOST COMPLETE
+
+### ✅ Completed
+1. ✅ Supabase CLI installed and authenticated
+2. ✅ Project linked to `tbdslkstlsshbowqtufq`
+3. ✅ Database schema deployed (up to date)
+4. ✅ All HTML files updated with correct project URL and API key
+5. ✅ `create-ta-profile` Edge Function deployed with security fixes (v2)
+
+### ⚠️ ONE TASK REMAINING
+
+**Deploy `cleanup-failed-signup` manually** (CLI bundler error - needs manual upload)
+
+---
+
+## 🔴 CRITICAL: Manual Deployment Required
+
+The `cleanup-failed-signup` function needs to be deployed manually through the Supabase Dashboard.
+
+### Step-by-Step Instructions:
+
+1. **Go to Edge Functions page:**
+   https://supabase.com/dashboard/project/tbdslkstlsshbowqtufq/functions
+
+2. **Find `cleanup-failed-signup` in the list**
+   - It may already exist (old version without security fixes)
+   - Click on it to open
+
+3. **Edit the function:**
+   - Click **"Edit Function"** or **"Deploy"** button
+   - You'll see a code editor
+
+4. **Copy the ENTIRE contents of this file:**
+   `supabase/functions/cleanup-failed-signup/index.ts`
+
+5. **Paste it into the dashboard editor**
+   - Select all existing code (Ctrl+A)
+   - Paste the new code (Ctrl+V)
+
+6. **Click "Deploy"**
+   - Wait for deployment to complete
+   - Should see "Successfully deployed"
+
+### 📋 Quick Copy (Entire Function Code)
+
+```typescript
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -125,3 +173,36 @@ serve(async (req: Request) => {
     );
   }
 });
+```
+
+---
+
+## ✅ After Deployment
+
+Once you've manually deployed `cleanup-failed-signup`, everything will be ready!
+
+### Test Your Application
+
+1. **Refresh your browser** (to load updated HTML files)
+2. **Go to:** http://127.0.0.1:8000/login.html
+3. **Try signing up** with a NEW email address
+4. **Signup should work completely!**
+
+### What's Fixed
+
+- ✅ Edge Functions now require JWT authentication
+- ✅ Users can only create/delete their own profiles
+- ✅ Cleanup has 5-minute time window
+- ✅ Email validation enforced
+- ✅ No more "User already exists" on failed signups
+- ✅ All security vulnerabilities (CVE-1 through CVE-5) resolved
+
+---
+
+## 🚀 Your Application Is Ready!
+
+**Frontend:** http://127.0.0.1:8000  
+**Supabase Dashboard:** https://supabase.com/dashboard/project/tbdslkstlsshbowqtufq  
+**Edge Functions:** https://supabase.com/dashboard/project/tbdslkstlsshbowqtufq/functions
+
+**Project:** muhammad-abdullah-nova-dev's Project (`tbdslkstlsshbowqtufq`)

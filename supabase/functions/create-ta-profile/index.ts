@@ -25,15 +25,18 @@ serve(async (req: Request) => {
       );
     }
 
-    // Create client with service role for database operations
-    const supabase = createClient(
+    // Extract JWT token
+    const jwt = authHeader.replace("Bearer ", "");
+    
+    // Create client with the user's JWT to verify authentication
+    const supabaseAuth = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
     );
 
-    // Extract and verify JWT
-    const jwt = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(jwt);
+    // Verify JWT and get authenticated user
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
 
     if (authError || !user) {
       return new Response(
@@ -41,6 +44,12 @@ serve(async (req: Request) => {
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Create service role client for database operations
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
 
     // 2. Parse request body (auth_user_id removed - we use JWT user.id)
     const body = await req.json();
