@@ -628,14 +628,13 @@
         headers: {
           'Content-Type': 'application/json',
           'apikey': SUPABASE_ANON,
-          'Authorization': `Bearer ${SUPABASE_ANON}`
+          'Authorization': `Bearer ${authData.session.access_token}`
         },
         body: JSON.stringify({
           ta_name:      taName,
           ta_email:     email,
           course,
-          sir_name:     sirName,
-          auth_user_id: authData.user.id
+          sir_name:     sirName
         })
       });
 
@@ -651,7 +650,7 @@
             headers: {
               'Content-Type': 'application/json',
               'apikey': SUPABASE_ANON,
-              'Authorization': `Bearer ${SUPABASE_ANON}`
+              'Authorization': `Bearer ${authData.session.access_token}`
             },
             body: JSON.stringify({ auth_user_id: authData.user.id })
           });

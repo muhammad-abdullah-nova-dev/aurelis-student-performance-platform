@@ -10,15 +10,20 @@ const corsHeaders = {
 // right after Step 1 (auth.signUp) already succeeded. Deletes the just-created
 // auth user so the person can retry signup with the same email instead of
 // getting stuck on "User already registered" forever.
+//
+// SECURITY: Requires JWT authentication. Users can only delete their own
+// failed signup within a 5-minute window. Profile existence check prevents
+// deletion of fully-created accounts.
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { auth_user_id } = await req.json();
-    if (!auth_user_id) {
+    // 1. Require and verify JWT authentication
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: "Missing auth_user_id" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Unauthorized - authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -27,7 +32,57 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Safety check: only delete if this user has NO ta_profiles row —
+    // Extract and verify JWT
+    const jwt = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.getUser(jwt);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Invalid authentication token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 2. Parse request body
+    const { auth_user_id } = await req.json();
+    
+    if (!auth_user_id) {
+      return new Response(
+        JSON.stringify({ error: "Missing auth_user_id" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 3. Enforce ownership - caller can only delete their own account
+    if (auth_user_id !== user.id) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden - can only delete your own failed signup" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 4. Check time window - only allow cleanup within 5 minutes of account creation
+    const { data: authUser, error: getUserError } = await supabase.auth.admin.getUserById(auth_user_id);
+    
+    if (getUserError || !authUser) {
+      return new Response(
+        JSON.stringify({ error: "Account not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const createdAt = new Date(authUser.user.created_at);
+    const now = new Date();
+    const ageMinutes = (now.getTime() - createdAt.getTime()) / 1000 / 60;
+
+    if (ageMinutes > 5) {
+      return new Response(
+        JSON.stringify({ error: "Cleanup window expired" }),
+        { status: 410, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 5. Safety check: only delete if this user has NO ta_profiles row —
     // never delete a real, fully-created account.
     const { data: profile } = await supabase
       .from("ta_profiles")
@@ -37,15 +92,17 @@ serve(async (req: Request) => {
 
     if (profile) {
       return new Response(
-        JSON.stringify({ error: "Refusing to delete — profile already exists." }),
+        JSON.stringify({ error: "Account is already complete" }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // 6. Delete the auth user (allows retry with same email)
     const { error } = await supabase.auth.admin.deleteUser(auth_user_id);
+    
     if (error) {
       return new Response(
-        JSON.stringify({ error: error.message }),
+        JSON.stringify({ error: "Failed to cleanup account" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -56,7 +113,7 @@ serve(async (req: Request) => {
     );
   } catch (err) {
     return new Response(
-      JSON.stringify({ error: "Server error." }),
+      JSON.stringify({ error: "Server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
