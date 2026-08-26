@@ -30,18 +30,30 @@ serve(async (req: Request) => {
           name,
           sir_name,
           class_link_token,
-          ta_profiles (
-            id,
-            name,
-            avatar_url
-          )
+          ta_id
         `)
         .eq("class_link_token", token)
         .single();
 
       if (clsErr || !cls) {
+        console.error("Class lookup error:", clsErr);
         return new Response(
           JSON.stringify({ error: "Invalid class link" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Fetch TA profile separately
+      const { data: taProfile, error: taErr } = await supabase
+        .from("ta_profiles")
+        .select("id, name, avatar_url")
+        .eq("id", cls.ta_id)
+        .single();
+
+      if (taErr || !taProfile) {
+        console.error("TA profile lookup error:", taErr);
+        return new Response(
+          JSON.stringify({ error: "TA profile not found" }),
           { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -52,8 +64,8 @@ serve(async (req: Request) => {
           class_id: cls.id,
           course: cls.name,
           sir_name: cls.sir_name,
-          ta_name: cls.ta_profiles.name,
-          avatar_url: cls.ta_profiles.avatar_url || null
+          ta_name: taProfile.name,
+          avatar_url: taProfile.avatar_url || null
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
