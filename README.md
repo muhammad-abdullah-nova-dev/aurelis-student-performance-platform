@@ -2,7 +2,8 @@
 
 A modern, secure web application designed to streamline grading workflows for teaching assistants and provide real-time performance insights for students and instructors.
 
-[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://muhammad-abdullah-nova-dev.github.io/aurelis-student-performance-platform/)
+[![Live Demo - Vercel](https://img.shields.io/badge/demo-Vercel-black)](https://aurelis-student-performance-platfor.vercel.app/)
+[![Live Demo - GitHub](https://img.shields.io/badge/demo-GitHub%20Pages-success)](https://muhammad-abdullah-nova-dev.github.io/aurelis-student-performance-platform/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 [![Supabase](https://img.shields.io/badge/backend-Supabase-green)](https://supabase.com)
 
@@ -33,7 +34,9 @@ A modern, secure web application designed to streamline grading workflows for te
 
 ## 🚀 Live Demo
 
-**Production:** [https://muhammad-abdullah-nova-dev.github.io/aurelis-student-performance-platform/](https://muhammad-abdullah-nova-dev.github.io/aurelis-student-performance-platform/)
+**Primary (Vercel):** [https://aurelis-student-performance-platfor.vercel.app/](https://aurelis-student-performance-platfor.vercel.app/)
+
+**Alternative (GitHub Pages):** [https://muhammad-abdullah-nova-dev.github.io/aurelis-student-performance-platform/](https://muhammad-abdullah-nova-dev.github.io/aurelis-student-performance-platform/)
 
 ### Test Accounts
 - Create your own TA account via the signup page
@@ -56,7 +59,8 @@ A modern, secure web application designed to streamline grading workflows for te
   - Authentication & authorization
   - Edge Functions (Deno runtime)
   - Real-time subscriptions
-- **GitHub Pages** - Frontend hosting
+- **Vercel** - Primary frontend hosting (https://aurelis-student-performance-platfor.vercel.app/)
+- **GitHub Pages** - Alternative hosting
 - **Git** - Version control
 
 ### Security
