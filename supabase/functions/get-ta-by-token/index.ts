@@ -30,7 +30,7 @@ serve(async (req: Request) => {
           name,
           sir_name,
           class_link_token,
-          ta_profiles!classes_ta_id_fkey (
+          ta_profiles (
             id,
             name,
             avatar_url
