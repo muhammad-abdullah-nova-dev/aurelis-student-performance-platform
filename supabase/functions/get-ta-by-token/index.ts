@@ -46,7 +46,7 @@ serve(async (req: Request) => {
       // Fetch TA profile separately
       const { data: taProfile, error: taErr } = await supabase
         .from("ta_profiles")
-        .select("id, name, avatar_url")
+        .select("id, ta_name, avatar_url")
         .eq("id", cls.ta_id)
         .single();
 
@@ -64,7 +64,7 @@ serve(async (req: Request) => {
           class_id: cls.id,
           course: cls.name,
           sir_name: cls.sir_name,
-          ta_name: taProfile.name,
+          ta_name: taProfile.ta_name,
           avatar_url: taProfile.avatar_url || null
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
