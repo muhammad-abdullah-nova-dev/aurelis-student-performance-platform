@@ -1349,7 +1349,8 @@ async function generateTeacherLink() {
 function renderTeacherLinkBox(token) {
   const el = document.getElementById('teacher-link-display');
   if (!token) { el.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="generateTeacherLink()">⚡ Generate Teacher Link</button>`; return; }
-  const url = `${window.location.origin}/teacher-view.html?token=${token}`;
+  const baseUrl = window.location.origin + window.location.pathname.replace('/dashboard.html', '');
+  const url = `${baseUrl}/teacher-view.html?token=${token}`;
   el.innerHTML = `
     <div class="link-box">
       <span class="link-url">${url}</span>
@@ -1841,7 +1842,8 @@ function updateOverviewStats() {
   // Overview link box
   const ovLinkBox = document.getElementById('ov-link-box');
   if (currentClass?.class_link_token) {
-    const url = `${window.location.origin}/join.html?ta=${currentClass.class_link_token}`;
+    const baseUrl = window.location.origin + window.location.pathname.replace('/dashboard.html', '');
+    const url = `${baseUrl}/join.html?ta=${currentClass.class_link_token}`;
     ovLinkBox.innerHTML = `<div class="link-box"><span class="link-url">${url}</span><button class="copy-btn" onclick="copyLink('${url}')">Copy</button></div>`;
   }
 
@@ -1976,7 +1978,8 @@ async function generateLink() {
 function renderLinkBox(token) {
   const el = document.getElementById('link-display');
   if (!token) { el.innerHTML = '<p style="color:var(--text-muted);font-size:0.88rem">No link yet. Click Generate.</p>'; return; }
-  const url = `${window.location.origin}/join.html?ta=${token}`;
+  const baseUrl = window.location.origin + window.location.pathname.replace('/dashboard.html', '');
+  const url = `${baseUrl}/join.html?ta=${token}`;
   el.innerHTML = `
     <div class="link-box">
       <span class="link-url">${url}</span>
