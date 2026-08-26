@@ -6,25 +6,66 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// A student is NOT logged in — this function uses the class token (from
-// their join link) + their roll number to securely return ONLY that one
-// student's status and marks. It never exposes anyone else's data.
+// This function handles two cases:
+// 1. Initial join page load: receives { token } → returns TA & class info
+// 2. Student checking marks: receives { class_token, roll_no } → returns student marks
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { class_token, roll_no } = await req.json();
-    if (!class_token || !roll_no) {
-      return new Response(
-        JSON.stringify({ error: "Missing class_token or roll_no" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const body = await req.json();
+    const { token, class_token, roll_no } = body;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // CASE 1: Initial page load - fetch TA and class info by token
+    if (token && !class_token && !roll_no) {
+      const { data: cls, error: clsErr } = await supabase
+        .from("classes")
+        .select(`
+          id,
+          name,
+          sir_name,
+          class_link_token,
+          ta_profiles!classes_ta_id_fkey (
+            id,
+            name,
+            avatar_url
+          )
+        `)
+        .eq("class_link_token", token)
+        .single();
+
+      if (clsErr || !cls) {
+        return new Response(
+          JSON.stringify({ error: "Invalid class link" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Return TA and class info for join page
+      return new Response(
+        JSON.stringify({
+          class_id: cls.id,
+          course: cls.name,
+          sir_name: cls.sir_name,
+          ta_name: cls.ta_profiles.name,
+          avatar_url: cls.ta_profiles.avatar_url || null
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // CASE 2: Student checking their marks
+    if (!class_token || !roll_no) {
+      return new Response(
+        JSON.stringify({ error: "Missing required parameters" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { data: cls, error: clsErr } = await supabase
       .from("classes")
@@ -118,6 +159,7 @@ serve(async (req: Request) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
+    console.error("Edge function error:", err);
     return new Response(
       JSON.stringify({ error: "Server error." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
