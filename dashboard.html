@@ -189,6 +189,7 @@
     }
 
     .sidebar-bottom {
+      margin-top: auto;
       padding: 16px 12px;
       border-top: 1px solid var(--border);
       background: linear-gradient(180deg, var(--surface) 0%, var(--surface-muted) 100%);
@@ -1085,7 +1086,7 @@
 //  CONFIG — Replace with your values
 // ══════════════════════════════════════════
 const SUPABASE_URL  = 'https://tbdslkstlsshbowqtufq.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_7RRIoqiERasKAsJDhfwTiA_h-Ee-R5t';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZHNsa3N0bHNzaGJvd3F0dWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1OTUwNzYsImV4cCI6MjEwMzE3MTA3Nn0.nli_eewEq4cWLoo5J6UCRCO8fvcoDwN9AKx4ctHbMs8';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 let currentTA   = null;   // ta_profiles row
