@@ -641,15 +641,67 @@
     /* ── MOBILE ── */
     .mob-toggle { display:none; }
     @media(max-width:900px) {
+      /* Sidebar & Main */
       .sidebar { transform:translateX(-100%); }
       .sidebar.open { transform:translateX(0); }
-      .main { margin-left:0; padding:20px; }
-      .stats-row { grid-template-columns:1fr 1fr; }
+      .main { margin-left:0; padding:20px 16px; }
+      
+      /* Top Bar */
+      .topbar { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 16px;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+      }
+      .topbar-left { width: 100%; }
+      .topbar-right { 
+        width: 100%; 
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+      .page-title { font-size: 1.5rem; }
+      .page-sub { font-size: 0.8rem; margin-top: 3px; }
+      
+      /* Stats Row */
+      .stats-row { grid-template-columns:1fr 1fr; gap:12px; margin-bottom: 20px; }
+      .stat-card { padding: 16px 18px; }
+      .stat-label { font-size: 0.7rem; }
+      .stat-value { font-size: 1.6rem; }
+      
+      /* Mobile Toggle */
       .mob-toggle { display:flex; }
-      .profile-grid { grid-template-columns:1fr; }
-
+      
+      /* Profile Grid */
+      .profile-grid { grid-template-columns:1fr; gap: 12px; }
+      
+      /* Buttons */
+      .btn { padding: 12px 18px; font-size: 0.85rem; }
+      .icon-btn { width: 36px; height: 36px; font-size: 0.9rem; }
+      
+      /* Cards */
+      .card { padding: 20px 16px; }
+      .card-title { font-size: 1.1rem; }
+      
+      /* Forms */
+      .form-grid { grid-template-columns: 1fr; gap: 12px; }
+      .form-label { font-size: 0.8rem; }
+      .form-input, .form-select, .form-textarea { 
+        font-size: 0.9rem; 
+        padding: 10px 12px;
+      }
+      
+      /* Tables - Horizontal Scroll */
+      .table-wrapper { 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -16px;
+        padding: 0 16px;
+      }
+      
+      /* Marks Table Sticky Columns */
       #marks-table { table-layout: auto; width: max-content; min-width: 100%; }
-      #marks-table th, #marks-table td { white-space: nowrap; }
+      #marks-table th, #marks-table td { white-space: nowrap; font-size: 0.85rem; padding: 10px 8px; }
       #marks-table th:nth-child(1), #marks-table td:nth-child(1) { width: auto; }
       #marks-table th:nth-child(2), #marks-table td:nth-child(2) { width: auto; }
       #marks-table th:nth-child(1), #marks-table td:nth-child(1),
@@ -663,10 +715,56 @@
       #marks-table th:nth-child(2), #marks-table td:nth-child(2) { z-index: 2; }
       #marks-table th:not(:nth-child(1)):not(:nth-child(2)),
       #marks-table td:not(:nth-child(1)):not(:nth-child(2)) { min-width: 80px; }
-      #marks-table .marks-input { max-width: 70px; font-size: 0.9rem; padding: 8px 4px; }
+      #marks-table .marks-input { max-width: 70px; font-size: 0.85rem; padding: 8px 4px; }
+      
+      /* Student Table */
+      #student-table th, #student-table td { font-size: 0.85rem; padding: 10px 8px; }
+      
+      /* Modal */
+      .modal-content { 
+        width: 95vw; 
+        max-width: 95vw;
+        margin: 20px auto;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      
+      /* Class Pills */
+      .side-list-item { 
+        font-size: 0.75rem; 
+        padding: 5px 12px;
+      }
     }
-    @media(max-width:500px) {
-      .stats-row { grid-template-columns:1fr 1fr; gap:10px; }
+    
+    @media(max-width:600px) {
+      /* Even Smaller Screens */
+      .stats-row { grid-template-columns: 1fr; gap:10px; }
+      .stat-card { padding: 14px 16px; }
+      
+      .topbar-right { gap: 6px; }
+      
+      /* Sidebar Width */
+      :root { --sidebar: 280px; }
+      
+      /* Page Title */
+      .page-title { font-size: 1.3rem; }
+      
+      /* Buttons Stack */
+      .topbar-right .btn { 
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    @media(max-width:400px) {
+      /* Very Small Screens */
+      .main { padding: 16px 12px; }
+      .card { padding: 16px 12px; }
+      
+      .table-wrapper { 
+        margin: 0 -12px;
+        padding: 0 12px;
+      }
     }
 
     /* ── OVERLAY ── */
