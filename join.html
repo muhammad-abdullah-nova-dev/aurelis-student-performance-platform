@@ -530,20 +530,32 @@
 
       if (dupData.taken) { setLoading(false); showState('already'); checkStatus(roll_no); return; }
 
-      // Insert student
-      const { error } = await sb.from('students').insert({
-        ta_id:    taData.ta_id,
-        class_id: taData.class_id,
-        name,
-        roll_no,
-        email:   email || null,
-        status:  'pending',
+      // Register student via edge function (secure)
+      const regRes = await fetch(`${SUPABASE_URL}/functions/v1/register-student`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`
+        },
+        body: JSON.stringify({
+          ta_id: taData.ta_id,
+          class_id: taData.class_id,
+          name,
+          roll_no,
+          email: email || null
+        })
       });
 
+      const regData = await regRes.json();
       setLoading(false);
 
-      if (error) {
-        if (error.code === '23505') { showState('already'); checkStatus(roll_no); return; }
+      if (!regRes.ok || regData.error) {
+        if (regData.error === 'Already registered') {
+          showState('already');
+          checkStatus(roll_no);
+          return;
+        }
         showAlert('error', '❌ Something went wrong. Please try again.');
         return;
       }
