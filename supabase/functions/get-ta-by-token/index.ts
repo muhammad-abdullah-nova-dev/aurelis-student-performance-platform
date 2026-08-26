@@ -61,6 +61,7 @@ serve(async (req: Request) => {
       // Return TA and class info for join page
       return new Response(
         JSON.stringify({
+          ta_id: cls.ta_id,
           class_id: cls.id,
           course: cls.name,
           sir_name: cls.sir_name,
