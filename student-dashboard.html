@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aurelis — Student Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── DESIGN TOKENS ── */
+    :root {
+      --brand-primary:        #3E7A54;
+      --brand-primary-hover:  #2C5A3F;
+      --brand-secondary:      #C63D2F;
+      --brand-accent:         #D9A441;
+
+      --background:       #F7F1E8;
+      --surface:          #EFE6D4;
+      --surface-elevated: #FDFAF5;
+      --surface-muted:    #EAE0CE;
+
+      --text-primary:   #1E1A17;
+      --text-secondary: #4A3F36;
+      --text-muted:     #7A6E64;
+      --text-inverse:   #FDFAF5;
+
+      --border:        #DDD4C0;
+      --border-subtle: #EAE0CE;
+      --border-strong: #C4B99E;
+
+      --success:        #2E6B45;
+      --success-bg:     rgba(46,107,69,0.08);
+      --warning:        #B8832A;
+      --warning-bg:     rgba(217,164,65,0.10);
+      --danger:         #C63D2F;
+      --danger-bg:      rgba(198,61,47,0.08);
+
+      --shadow-xs: 0 1px 3px rgba(30,26,23,0.08);
+      --shadow-sm: 0 2px 8px rgba(30,26,23,0.08), 0 1px 3px rgba(30,26,23,0.05);
+      --shadow-md: 0 4px 16px rgba(30,26,23,0.10), 0 2px 6px rgba(30,26,23,0.06);
+      --shadow-lg: 0 8px 32px rgba(30,26,23,0.12), 0 4px 12px rgba(30,26,23,0.07);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 20px;
+
+      --sidebar: 240px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--background); color: var(--text-primary);
+      min-height: 100vh; display: flex; overflow-x: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar); min-height: 100vh;
+      background: var(--surface-elevated);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 50; transition: transform 0.3s;
+      box-shadow: 2px 0 12px rgba(30,26,23,0.04);
+    }
+    
+    .sidebar-logo {
+      padding: 28px 22px 20px;
+      font-family: 'Fraunces', serif;
+      font-size: 1.35rem; font-weight: 800;
+      border-bottom: 1px solid var(--border-subtle);
+      letter-spacing: -0.4px;
+      color: var(--text-primary);
+    }
+    .sidebar-logo span { 
+      color: var(--brand-primary);
+      background: linear-gradient(135deg, var(--brand-primary), var(--success));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .student-mini {
+      padding: 18px 20px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface);
+    }
+    .avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-primary), var(--success));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Fraunces', serif; font-weight: 800;
+      font-size: 0.88rem; color: #fff; flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(62,122,84,0.3);
+      border: 2px solid var(--surface-elevated);
+    }
+    .student-mini-info { overflow: hidden; }
+    .student-mini-name {
+      font-size: 0.875rem; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: var(--text-primary);
+    }
+    .student-mini-role {
+      font-size: 0.68rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1.2px; margin-top: 2px;
+      font-weight: 600;
+    }
+
+    nav.sidebar-nav { 
+      padding: 16px 12px; 
+      flex: 1; 
+      overflow-y: auto;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; border-radius: var(--radius-md);
+      cursor: pointer; margin-bottom: 3px;
+      color: var(--text-muted); font-size: 0.875rem; font-weight: 600;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .nav-item:hover {
+      background: var(--surface-muted);
+      color: var(--text-primary);
+    }
+    .nav-item.active {
+      background: linear-gradient(135deg, var(--brand-primary), var(--success));
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-icon { 
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logout-btn {
+      margin: 12px;
+      padding: 11px 14px;
+      background: var(--danger-bg);
+      border: 1px solid rgba(198,61,47,0.2);
+      color: var(--danger);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      margin-top: auto;
+    }
+    .logout-btn:hover {
+      background: rgba(198,61,47,0.15);
+      transform: translateY(-2px);
+    }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar);
+      flex: 1; padding: 36px 40px;
+      min-height: 100vh;
+      background: var(--background);
+      max-width: calc(100vw - var(--sidebar));
+      overflow-x: hidden;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .page-title {
+      font-family: 'Fraunces', serif; font-size: 1.75rem; font-weight: 800;
+      letter-spacing: -0.7px; color: var(--text-primary);
+    }
+    .page-sub { 
+      font-size: 0.875rem; 
+      color: var(--text-secondary); 
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    /* ── SECTIONS ── */
+    .section { display: none; animation: fadeIn 0.3s ease both; max-width: 100%; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── STAT CARDS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 22px 24px;
+      position: relative; overflow: hidden;
+      transition: all 0.25s;
+    }
+    .stat-card:hover { 
+      transform: translateY(-3px); 
+      box-shadow: var(--shadow-lg);
+    }
+    .stat-card::after {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+    }
+    .stat-card.green::after { background: linear-gradient(90deg, var(--brand-primary), var(--success)); }
+    .stat-card.blue::after  { background: linear-gradient(90deg, #2563EB, #3B82F6); }
+    .stat-card.orange::after { background: linear-gradient(90deg, var(--brand-accent), var(--warning)); }
+    
+    .stat-label { 
+      font-size: 0.75rem; 
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .stat-value { 
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: linear-gradient(180deg, var(--surface-elevated) 0%, var(--surface) 100%);
+    }
+    .card-title {
+      font-family:'Fraunces',serif;
+      font-size:1.05rem;
+      font-weight:800;
+      color: var(--text-primary);
+    }
+    .card-body { padding: 24px; }
+
+    /* ── TABLE ── */
+    .table-wrapper { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th {
+      text-align: left;
+      padding: 12px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid var(--border);
+    }
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+    tr:hover td {
+      background: var(--surface);
+    }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .badge.success { background: var(--success-bg); color: var(--success); }
+    .badge.warning { background: var(--warning-bg); color: var(--warning); }
+    .badge.danger { background: var(--danger-bg); color: var(--danger); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    .empty-state p {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* ── LOADING ── */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    /* ── MOBILE ── */
+    .mob-toggle { display:none; }
+    @media(max-width:900px) {
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.open { transform:translateX(0); }
+      .main { margin-left:0; padding:20px 16px; max-width: 100vw; }
+      .stats-row { grid-template-columns:1fr; gap:12px; }
+      .mob-toggle { 
+        display:flex;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 60;
+        width: 44px;
+        height: 44px;
+        background: var(--surface-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: var(--shadow-md);
+      }
+    }
+
+    .overlay { display:none; position:fixed; inset:0; background:rgba(30,26,23,0.45); z-index:40; }
+    .overlay.show { display:block; }
+  </style>
+</head>
+<body>
+  <!-- Mobile menu toggle -->
+  <div class="mob-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show');">☰</div>
+  <div class="overlay" id="overlay" onclick="document.querySelector('.sidebar').classList.remove('open'); this.classList.remove('show');"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Aure<span>lis</span></div>
+    
+    <div class="student-mini">
+      <div class="avatar" id="student-avatar">S</div>
+      <div class="student-mini-info">
+        <div class="student-mini-name" id="student-name">Loading...</div>
+        <div class="student-mini-role">Student</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-section="overview">
+        <span class="nav-icon">📊</span>
+        <span>Overview</span>
+      </div>
+      <div class="nav-item" data-section="classes">
+        <span class="nav-icon">📚</span>
+        <span>My Classes</span>
+      </div>
+      <div class="nav-item" data-section="marks">
+        <span class="nav-icon">📝</span>
+        <span>All Marks</span>
+      </div>
+      <div class="nav-item" data-section="profile">
+        <span class="nav-icon">👤</span>
+        <span>Profile</span>
+      </div>
+    </nav>
+
+    <button class="logout-btn" onclick="handleLogout()">
+      <span>🚪</span>
+      <span>Logout</span>
+    </button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Overview Section -->
+    <section class="section active" id="section-overview">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Overview</h1>
+          <p class="page-sub">Your academic performance at a glance</p>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card green">
+          <div class="stat-label">Enrolled Classes</div>
+          <div class="stat-value" id="stat-classes">0</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Total Assessments</div>
+          <div class="stat-value" id="stat-assessments">0</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-label">Average Score</div>
+          <div class="stat-value" id="stat-average">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Marks</div>
+        </div>
+        <div class="card-body">
+          <div id="recent-marks-content">
+            <div class="loading">Loading recent marks...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Classes Section -->
+    <section class="section" id="section-classes">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">My Classes</h1>
+          <p class="page-sub">All your enrolled classes</p>
+        </div>
+      </div>
+
+      <div id="classes-content">
+        <div class="loading">Loading classes...</div>
+      </div>
+    </section>
+
+    <!-- Marks Section -->
+    <section class="section" id="section-marks">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">All Marks</h1>
+          <p class="page-sub">Detailed view of all your marks</p>
+        </div>
+      </div>
+
+      <div id="marks-content">
+        <div class="loading">Loading marks...</div>
+      </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section class="section" id="section-profile">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">Profile</h1>
+          <p class="page-sub">Manage your account information</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Personal Information</div>
+        </div>
+        <div class="card-body">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <strong style="font-size:0.85rem;color:var(--text-muted);">Name</strong>
+              <p id="profile-name" style="margin-top:6px;font-size:0.95rem;">-</p>
+            </div>
+            <div>
+              <strong style="font-size:0.85rem;color:var(--text-muted);">Email</strong>
+              <p id="profile-email" style="margin-top:6px;font-size:0.95rem;">-</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://tbdslkstlsshbowqtufq.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZHNsa3N0bHNzaGJvd3F0dWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1OTUwNzYsImV4cCI6MjEwMzE3MTA3Nn0.nli_eewEq4cWLoo5J6UCRCO8fvcoDwN9AKx4ctHbMs8';
+    
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    let currentStudent = null;
+    let studentEnrollments = [];
+
+    // Navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const section = item.dataset.section;
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        item.classList.add('active');
+        document.getElementById(`section-${section}`).classList.add('active');
+        
+        // Close mobile menu
+        document.querySelector('.sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('show');
+      });
+    });
+
+    async function init() {
+      // Check authentication
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        window.location.href = 'student-login.html';
+        return;
+      }
+
+      // Get student data
+      const { data: student, error } = await sb
+        .from('students')
+        .select(`
+          id, name, roll_no, email, status,
+          classes (id, name, sir_name, marks_visible)
+        `)
+        .eq('auth_user_id', session.user.id)
+        .single();
+
+      if (error || !student) {
+        console.error('Student not found:', error);
+        await sb.auth.signOut();
+        window.location.href = 'student-login.html';
+        return;
+      }
+
+      if (student.status !== 'approved') {
+        alert('Your enrollment is pending TA approval');
+        await sb.auth.signOut();
+        window.location.href = 'student-login.html';
+        return;
+      }
+
+      currentStudent = student;
+      
+      // Update UI
+      const initials = student.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+      document.getElementById('student-avatar').textContent = initials;
+      document.getElementById('student-name').textContent = student.name;
+      document.getElementById('profile-name').textContent = student.name;
+      document.getElementById('profile-email').textContent = student.email;
+
+      // Load data
+      await loadOverview();
+      await loadClasses();
+      await loadAllMarks();
+    }
+
+    async function loadOverview() {
+      // Get student's marks
+      const { data: marks } = await sb
+        .from('marks')
+        .select('marks, total, category_id, mark_categories(name), student_id')
+        .eq('student_id', currentStudent.id);
+
+      const totalAssessments = marks?.length || 0;
+      const validMarks = marks?.filter(m => m.marks !== null) || [];
+      const average = validMarks.length > 0
+        ? Math.round((validMarks.reduce((sum, m) => sum + (m.marks / m.total * 100), 0) / validMarks.length))
+        : 0;
+
+      document.getElementById('stat-classes').textContent = '1'; // For now, single class
+      document.getElementById('stat-assessments').textContent = totalAssessments;
+      document.getElementById('stat-average').textContent = average > 0 ? `${average}%` : '-';
+
+      // Recent marks
+      const recentMarks = marks?.slice(0, 5) || [];
+      const recentContent = document.getElementById('recent-marks-content');
+      
+      if (recentMarks.length === 0) {
+        recentContent.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No marks yet</p></div>';
+      } else {
+        recentContent.innerHTML = `
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Assessment</th>
+                  <th>Score</th>
+                  <th>Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${recentMarks.map(m => `
+                  <tr>
+                    <td>${m.mark_categories?.name || 'Untitled'}</td>
+                    <td>${m.marks ?? '-'} / ${m.total}</td>
+                    <td>${m.marks !== null ? Math.round(m.marks / m.total * 100) + '%' : '-'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    }
+
+    async function loadClasses() {
+      const classesContent = document.getElementById('classes-content');
+      
+      classesContent.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">${currentStudent.classes.name}</div>
+          </div>
+          <div class="card-body">
+            <p><strong>Teacher:</strong> ${currentStudent.classes.sir_name}</p>
+            <p style="margin-top:8px;"><strong>Roll Number:</strong> ${currentStudent.roll_no}</p>
+            <p style="margin-top:8px;">
+              <strong>Marks Visibility:</strong> 
+              <span class="badge ${currentStudent.classes.marks_visible ? 'success' : 'warning'}">
+                ${currentStudent.classes.marks_visible ? 'Visible' : 'Hidden'}
+              </span>
+            </p>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadAllMarks() {
+      const { data: marks } = await sb
+        .from('marks')
+        .select('marks, total, category_id, mark_categories(name)')
+        .eq('student_id', currentStudent.id)
+        .order('created_at', { ascending: false });
+
+      const marksContent = document.getElementById('marks-content');
+
+      if (!marks || marks.length === 0) {
+        marksContent.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No marks available yet</p></div>';
+        return;
+      }
+
+      marksContent.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">All Assessments</div>
+          </div>
+          <div class="card-body">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Assessment</th>
+                    <th>Your Score</th>
+                    <th>Total</th>
+                    <th>Percentage</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${marks.map(m => {
+                    const percentage = m.marks !== null ? Math.round(m.marks / m.total * 100) : null;
+                    const status = percentage === null ? 'pending' : percentage >= 75 ? 'success' : percentage >= 50 ? 'warning' : 'danger';
+                    const statusText = percentage === null ? 'Not Graded' : percentage >= 75 ? 'Excellent' : percentage >= 50 ? 'Good' : 'Needs Improvement';
+                    
+                    return `
+                      <tr>
+                        <td>${m.mark_categories?.name || 'Untitled'}</td>
+                        <td>${m.marks ?? '-'}</td>
+                        <td>${m.total}</td>
+                        <td>${percentage !== null ? percentage + '%' : '-'}</td>
+                        <td><span class="badge ${status}">${statusText}</span></td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function handleLogout() {
+      if (confirm('Are you sure you want to logout?')) {
+        await sb.auth.signOut();
+        window.location.href = 'student-login.html';
+      }
+    }
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>
