@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aurelis — Student Login</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── DESIGN TOKENS ── */
+    :root {
+      --brand-primary: #C63D2F;
+      --brand-secondary: #3E7A54;
+      --background: #F7F1E8;
+      --surface: #EFE6D4;
+      --surface-elevated: #FDFAF5;
+      --text-primary: #1E1A17;
+      --text-secondary: #4A3F36;
+      --text-muted: #7A6E64;
+      --border: #DDD4C0;
+      --border-subtle: #EAE0CE;
+      --danger: #C63D2F;
+      --danger-bg: rgba(198,61,47,0.08);
+      --success: #2E6B45;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 2px 8px rgba(30,26,23,0.08), 0 1px 3px rgba(30,26,23,0.05);
+      --shadow-md: 0 4px 16px rgba(30,26,23,0.10), 0 2px 6px rgba(30,26,23,0.06);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--background);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .logo {
+      text-align: center;
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 32px;
+      color: var(--text-primary);
+    }
+    .logo span {
+      background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(198,61,47,0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--brand-primary), var(--danger));
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    .alert.error {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid rgba(198,61,47,0.25);
+      display: block;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 24px 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .link a {
+      color: var(--brand-primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">Aure<span>lis</span></div>
+    
+    <div class="card">
+      <h1 class="card-title">Student Login</h1>
+      <p class="card-subtitle">Access your marks and performance</p>
+
+      <div class="alert error" id="alert"></div>
+
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" class="input" id="email" placeholder="your@email.com" required/>
+        </div>
+
+        <div class="field">
+          <label>Password</label>
+          <input type="password" class="input" id="password" placeholder="Enter your password" required/>
+        </div>
+
+        <button type="submit" class="btn" id="submit-btn">
+          Login →
+        </button>
+      </form>
+
+      <div class="divider">───</div>
+
+      <div class="link">
+        Don't have an account? Get your class link from your TA
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://tbdslkstlsshbowqtufq.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZHNsa3N0bHNzaGJvd3F0dWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1OTUwNzYsImV4cCI6MjEwMzE3MTA3Nn0.nli_eewEq4cWLoo5J6UCRCO8fvcoDwN9AKx4ctHbMs8';
+    
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    function showAlert(message) {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.style.display = 'block';
+    }
+
+    function hideAlert() {
+      document.getElementById('alert').style.display = 'none';
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      hideAlert();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('submit-btn');
+
+      btn.disabled = true;
+      btn.textContent = 'Logging in...';
+
+      try {
+        const { data, error } = await sb.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          showAlert('❌ ' + error.message);
+          btn.disabled = false;
+          btn.textContent = 'Login →';
+          return;
+        }
+
+        // Check if user is a student
+        const { data: student, error: stuErr } = await sb
+          .from('students')
+          .select('id, name, status')
+          .eq('auth_user_id', data.user.id)
+          .single();
+
+        if (stuErr || !student) {
+          showAlert('❌ Student account not found');
+          await sb.auth.signOut();
+          btn.disabled = false;
+          btn.textContent = 'Login →';
+          return;
+        }
+
+        if (student.status !== 'approved') {
+          showAlert('⏳ Your enrollment is pending TA approval');
+          await sb.auth.signOut();
+          btn.disabled = false;
+          btn.textContent = 'Login →';
+          return;
+        }
+
+        // Success - redirect to student dashboard
+        window.location.href = 'student-dashboard.html';
+      } catch (err) {
+        console.error(err);
+        showAlert('❌ Something went wrong');
+        btn.disabled = false;
+        btn.textContent = 'Login →';
+      }
+    }
+  </script>
+</body>
+</html>

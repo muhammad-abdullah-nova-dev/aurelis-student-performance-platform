@@ -405,10 +405,17 @@
           </div>
         </div>
         <div class="field">
-          <label>Email Address <span style="color:var(--text-muted);font-size:0.78rem"></span></label>
+          <label>Email Address</label>
           <div class="input-wrap">
             <span class="ico">✉️</span>
-            <input type="email" id="s-email" placeholder="your@email.com"/>
+            <input type="email" id="s-email" placeholder="your@email.com" required/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Password <span style="color:var(--text-muted);font-size:0.78rem">(min. 6 characters)</span></label>
+          <div class="input-wrap">
+            <span class="ico">🔒</span>
+            <input type="password" id="s-password" placeholder="Create a password" required/>
           </div>
         </div>
 
@@ -423,16 +430,15 @@
     <div class="state" id="state-success">
       <div class="form-card success-screen">
         <div class="success-icon">🎉</div>
-        <h2>Request Submitted!</h2>
-        <p>Your request has been sent to <strong id="success-ta-name" style="color:var(--accent2)">your TA</strong>.<br/>You'll be added once they approve you.</p>
+        <h2>Account Created!</h2>
+        <p>Your account has been created and enrollment request sent to <strong id="success-ta-name" style="color:var(--accent2)">your TA</strong>.<br/>You'll be able to login once they approve you.</p>
         <div class="success-steps">
-          <p>✅ <strong>Step 1:</strong> You've submitted your details</p>
+          <p>✅ <strong>Step 1:</strong> Account created successfully</p>
           <p>⏳ <strong>Step 2:</strong> TA reviews and approves your request</p>
+          <p>🔐 <strong>Step 3:</strong> Login with your email and password to view marks</p>
         </div>
-        <div style="margin-top:16px;padding:14px;background:var(--warning-bg);border:1px dashed var(--warning-border);border-radius:var(--radius-md);">
-          <p style="font-size:0.82rem;color:var(--text-primary);line-height:1.6;">
-            📌 <strong>Save this link and your Roll Number</strong> — once approved, come back to this same link anytime and enter your Roll Number to check your marks.
-          </p>
+        <div style="margin-top:20px;">
+          <a href="student-login.html" class="btn-submit" style="display:inline-block;text-decoration:none;padding:12px 24px;">Go to Login Page →</a>
         </div>
       </div>
     </div>
@@ -507,9 +513,13 @@
       const name    = document.getElementById('s-name').value.trim();
       const roll_no = document.getElementById('s-roll').value.trim();
       const email   = document.getElementById('s-email').value.trim();
+      const password = document.getElementById('s-password').value;
 
       if (!name)    { showAlert('error', '⚠️ Please enter your full name.'); return; }
       if (!roll_no) { showAlert('error', '⚠️ Please enter your roll number.'); return; }
+      if (!email)   { showAlert('error', '⚠️ Please enter your email address.'); return; }
+      if (!password) { showAlert('error', '⚠️ Please create a password.'); return; }
+      if (password.length < 6) { showAlert('error', '⚠️ Password must be at least 6 characters.'); return; }
 
       setLoading(true);
       clearAlert();
@@ -544,7 +554,8 @@
           class_id: taData.class_id,
           name,
           roll_no,
-          email: email || null
+          email,
+          password
         })
       });
 

@@ -10,11 +10,28 @@ serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { class_id, ta_id, name, roll_no, email } = await req.json();
+    const { class_id, ta_id, name, roll_no, email, password } = await req.json();
 
-    if (!class_id || !ta_id || !name || !roll_no) {
+    if (!class_id || !ta_id || !name || !roll_no || !email || !password) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
+        JSON.stringify({ error: "Missing required fields (name, roll_no, email, password required)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return new Response(
+        JSON.stringify({ error: "Password must be at least 6 characters" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -42,15 +59,36 @@ serve(async (req: Request) => {
       );
     }
 
-    // Insert new student
+    // Create auth user for student
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: email.trim(),
+      password: password,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        name: name.trim(),
+        roll_no: roll_no.trim(),
+        role: 'student'
+      }
+    });
+
+    if (authError || !authData.user) {
+      console.error("Auth user creation error:", authError);
+      return new Response(
+        JSON.stringify({ error: authError?.message || "Failed to create student account" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Insert new student linked to auth user
     const { data, error } = await supabase
       .from("students")
       .insert({
+        auth_user_id: authData.user.id,
         ta_id,
         class_id,
         name: name.trim(),
         roll_no: roll_no.trim(),
-        email: email ? email.trim() : null,
+        email: email.trim(),
         status: "pending"
       })
       .select()
@@ -58,6 +96,8 @@ serve(async (req: Request) => {
 
     if (error) {
       console.error("Student registration error:", error);
+      // Cleanup: delete auth user if student insert fails
+      await supabase.auth.admin.deleteUser(authData.user.id);
       return new Response(
         JSON.stringify({ error: "Registration failed" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -65,7 +105,11 @@ serve(async (req: Request) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, student: data }),
+      JSON.stringify({ 
+        success: true, 
+        student: data,
+        message: "Account created! You can now login with your email and password."
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
