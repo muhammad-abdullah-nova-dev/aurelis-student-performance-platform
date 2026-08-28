@@ -7,44 +7,30 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
   <style>
-    /* ── DESIGN TOKENS ── */
     :root {
       --brand-primary:        #3E7A54;
       --brand-primary-hover:  #2C5A3F;
-      --brand-secondary:      #C63D2F;
-      --brand-accent:         #D9A441;
-
       --background:       #F7F1E8;
       --surface:          #EFE6D4;
       --surface-elevated: #FDFAF5;
       --surface-muted:    #EAE0CE;
-
       --text-primary:   #1E1A17;
       --text-secondary: #4A3F36;
       --text-muted:     #7A6E64;
-      --text-inverse:   #FDFAF5;
-
       --border:        #DDD4C0;
       --border-subtle: #EAE0CE;
-      --border-strong: #C4B99E;
-
       --success:        #2E6B45;
       --success-bg:     rgba(46,107,69,0.08);
       --warning:        #B8832A;
       --warning-bg:     rgba(217,164,65,0.10);
       --danger:         #C63D2F;
       --danger-bg:      rgba(198,61,47,0.08);
-
-      --shadow-xs: 0 1px 3px rgba(30,26,23,0.08);
       --shadow-sm: 0 2px 8px rgba(30,26,23,0.08), 0 1px 3px rgba(30,26,23,0.05);
       --shadow-md: 0 4px 16px rgba(30,26,23,0.10), 0 2px 6px rgba(30,26,23,0.06);
       --shadow-lg: 0 8px 32px rgba(30,26,23,0.12), 0 4px 12px rgba(30,26,23,0.07);
-
       --radius-sm: 6px;
       --radius-md: 10px;
       --radius-lg: 14px;
-      --radius-xl: 20px;
-
       --sidebar: 240px;
     }
 
@@ -64,24 +50,19 @@
       display: flex; flex-direction: column;
       position: fixed; top: 0; left: 0; bottom: 0;
       z-index: 50; transition: transform 0.3s;
-      box-shadow: 2px 0 12px rgba(30,26,23,0.04);
     }
-    
     .sidebar-logo {
       padding: 28px 22px 20px;
       font-family: 'Fraunces', serif;
       font-size: 1.35rem; font-weight: 800;
       border-bottom: 1px solid var(--border-subtle);
       letter-spacing: -0.4px;
-      color: var(--text-primary);
     }
-    .sidebar-logo span { 
-      color: var(--brand-primary);
+    .sidebar-logo span {
       background: linear-gradient(135deg, var(--brand-primary), var(--success));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-
     .student-mini {
       padding: 18px 20px;
       display: flex; align-items: center; gap: 12px;
@@ -94,460 +75,221 @@
       display: flex; align-items: center; justify-content: center;
       font-family: 'Fraunces', serif; font-weight: 800;
       font-size: 0.88rem; color: #fff; flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(62,122,84,0.3);
-      border: 2px solid var(--surface-elevated);
     }
     .student-mini-info { overflow: hidden; }
     .student-mini-name {
       font-size: 0.875rem; font-weight: 700;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      color: var(--text-primary);
     }
     .student-mini-role {
       font-size: 0.68rem; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 1.2px; margin-top: 2px;
       font-weight: 600;
     }
-
-    nav.sidebar-nav { 
-      padding: 16px 12px; 
-      flex: 1; 
-      overflow-y: auto;
-    }
+    nav.sidebar-nav { padding: 16px 12px; flex: 1; overflow-y: auto; }
     .nav-item {
       display: flex; align-items: center; gap: 12px;
       padding: 11px 14px; border-radius: var(--radius-md);
       cursor: pointer; margin-bottom: 3px;
       color: var(--text-muted); font-size: 0.875rem; font-weight: 600;
-      transition: all 0.2s;
-      user-select: none;
+      transition: all 0.2s; user-select: none;
     }
-    .nav-item:hover {
-      background: var(--surface-muted);
-      color: var(--text-primary);
-    }
+    .nav-item:hover { background: var(--surface-muted); color: var(--text-primary); }
     .nav-item.active {
       background: linear-gradient(135deg, var(--brand-primary), var(--success));
-      color: white;
-      box-shadow: var(--shadow-sm);
+      color: white; box-shadow: var(--shadow-sm);
     }
-    .nav-icon { 
-      width: 20px; height: 20px;
-      display: flex; align-items: center; justify-content: center;
-    }
-
+    .nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
     .logout-btn {
-      margin: 12px;
-      padding: 11px 14px;
-      background: var(--danger-bg);
-      border: 1px solid rgba(198,61,47,0.2);
-      color: var(--danger);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      font-size: 0.875rem;
-      font-weight: 600;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      margin: 12px; padding: 11px 14px;
+      background: var(--danger-bg); border: 1px solid rgba(198,61,47,0.2);
+      color: var(--danger); border-radius: var(--radius-md);
+      cursor: pointer; font-size: 0.875rem; font-weight: 600;
+      transition: all 0.2s; display: flex; align-items: center; gap: 8px;
       justify-content: center;
-      margin-top: auto;
     }
-    .logout-btn:hover {
-      background: rgba(198,61,47,0.15);
-      transform: translateY(-2px);
-    }
+    .logout-btn:hover { background: rgba(198,61,47,0.15); }
 
     /* ── MAIN ── */
     .main {
-      margin-left: var(--sidebar);
-      flex: 1; padding: 36px 40px;
-      min-height: 100vh;
-      background: var(--background);
-      max-width: calc(100vw - var(--sidebar));
-      overflow-x: hidden;
+      margin-left: var(--sidebar); flex: 1; padding: 36px 40px;
+      min-height: 100vh; max-width: calc(100vw - var(--sidebar)); overflow-x: hidden;
     }
-
-    /* ── TOP BAR ── */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 32px;
-      padding-bottom: 20px;
+      margin-bottom: 32px; padding-bottom: 20px;
       border-bottom: 1px solid var(--border-subtle);
-      flex-wrap: wrap;
-      gap: 16px;
+      flex-wrap: wrap; gap: 16px;
     }
     .page-title {
       font-family: 'Fraunces', serif; font-size: 1.75rem; font-weight: 800;
-      letter-spacing: -0.7px; color: var(--text-primary);
+      letter-spacing: -0.7px;
     }
-    .page-sub { 
-      font-size: 0.875rem; 
-      color: var(--text-secondary); 
-      margin-top: 5px;
-      font-weight: 500;
-    }
+    .page-sub { font-size: 0.875rem; color: var(--text-secondary); margin-top: 5px; font-weight: 500; }
 
     /* ── SECTIONS ── */
-    .section { display: none; animation: fadeIn 0.3s ease both; max-width: 100%; }
+    .section { display: none; animation: fadeIn 0.3s ease both; }
     .section.active { display: block; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 
     /* ── STAT CARDS ── */
     .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 28px; }
     .stat-card {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
+      background: var(--surface-elevated); border: 1px solid var(--border);
       border-radius: var(--radius-lg); padding: 22px 24px;
-      position: relative; overflow: hidden;
-      transition: all 0.25s;
+      position: relative; overflow: hidden; transition: all 0.25s;
     }
-    .stat-card:hover { 
-      transform: translateY(-3px); 
-      box-shadow: var(--shadow-lg);
-    }
-    .stat-card::after {
-      content: ''; position: absolute;
-      top: 0; left: 0; right: 0; height: 4px;
-    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .stat-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
     .stat-card.green::after { background: linear-gradient(90deg, var(--brand-primary), var(--success)); }
     .stat-card.blue::after  { background: linear-gradient(90deg, #2563EB, #3B82F6); }
-    .stat-card.orange::after { background: linear-gradient(90deg, var(--brand-accent), var(--warning)); }
-    
-    .stat-label { 
-      font-size: 0.75rem; 
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .stat-value { 
-      font-family: 'Fraunces', serif;
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      line-height: 1;
-    }
+    .stat-card.orange::after { background: linear-gradient(90deg, #D9A441, var(--warning)); }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 8px; }
+    .stat-value { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 800; line-height: 1; }
 
     /* ── CARD ── */
     .card {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow-sm);
+      background: var(--surface-elevated); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 20px; box-shadow: var(--shadow-sm);
     }
     .card-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border-subtle);
+      padding: 18px 24px; border-bottom: 1px solid var(--border-subtle);
       background: linear-gradient(180deg, var(--surface-elevated) 0%, var(--surface) 100%);
     }
-    .card-title {
-      font-family:'Fraunces',serif;
-      font-size:1.05rem;
-      font-weight:800;
-      color: var(--text-primary);
-    }
+    .card-title { font-family:'Fraunces',serif; font-size:1.05rem; font-weight:800; }
     .card-body { padding: 24px; }
 
     /* ── TABLE ── */
-    .table-wrapper { overflow-x: auto; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
+    .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
     th {
-      text-align: left;
-      padding: 12px;
-      background: var(--surface);
-      color: var(--text-secondary);
-      font-weight: 700;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 2px solid var(--border);
+      text-align: left; padding: 12px; background: var(--surface);
+      color: var(--text-secondary); font-weight: 700; font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border);
     }
-    td {
-      padding: 14px 12px;
-      border-bottom: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-    }
-    tr:hover td {
-      background: var(--surface);
-    }
+    td { padding: 14px 12px; border-bottom: 1px solid var(--border-subtle); }
+    tr:hover td { background: var(--surface); }
 
     /* ── BADGE ── */
-    .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 100px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
     .badge.success { background: var(--success-bg); color: var(--success); }
     .badge.warning { background: var(--warning-bg); color: var(--warning); }
-    .badge.danger { background: var(--danger-bg); color: var(--danger); }
+    .badge.danger  { background: var(--danger-bg);  color: var(--danger); }
 
-    /* ── EMPTY STATE ── */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-    }
-    .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-    .empty-state p {
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
+    /* ── STATES ── */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .empty-icon  { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+    .empty-state p { font-size: 0.95rem; font-weight: 500; }
+    .loading { text-align: center; padding: 60px 20px; color: var(--text-muted); }
 
-    /* ── LOADING ── */
-    .loading {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-    }
-
-    /* ── MOBILE ── */
-    .mob-toggle { display:none; }
-    @media(max-width:900px) {
-      .sidebar { transform:translateX(-100%); }
-      .sidebar.open { transform:translateX(0); }
-      .main { margin-left:0; padding:20px 16px; max-width: 100vw; }
-      .stats-row { grid-template-columns:1fr; gap:12px; }
-      .stat-card { padding: 16px 14px; }
-      .stat-label { font-size: 0.68rem; line-height: 1.3; }
-      .stat-value { font-size: 1.8rem; }
-      .mob-toggle { 
-        display:flex;
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 60;
-        width: 44px;
-        height: 44px;
-        background: var(--surface-elevated);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: var(--shadow-md);
-      }
-      
-      /* Page Title */
-      .page-title { font-size: 1.4rem; }
-      .page-sub { font-size: 0.82rem; }
-      
-      /* Cards */
-      .card { margin-bottom: 16px; }
-      .card-header { padding: 14px 18px; }
-      .card-body { padding: 18px; }
-      .card-title { font-size: 0.95rem; }
-      
-      /* Tables */
-      table { font-size: 0.85rem; }
-      th { padding: 10px 8px; font-size: 0.72rem; }
-      td { padding: 12px 8px; }
-      
-      .table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-    }
-    
-    @media(max-width:600px) {
-      .main { padding: 16px 12px; }
-      .stats-row { gap: 10px; }
-      .stat-card { padding: 14px 12px; }
-      .stat-label { font-size: 0.65rem; }
-      .stat-value { font-size: 1.6rem; }
-      
-      .page-title { font-size: 1.25rem; }
-      
-      .card-body { padding: 16px; }
-      
-      table { font-size: 0.8rem; }
-      th { padding: 8px 6px; font-size: 0.68rem; }
-      td { padding: 10px 6px; }
-    }
-
-    .overlay { display:none; position:fixed; inset:0; background:rgba(30,26,23,0.45); z-index:40; }
-    .overlay.show { display:block; }
-
-    /* ── QUERY BUTTON & MODAL ── */
+    /* ── QUERY BUTTON ── */
     .query-btn {
-      padding: 6px 12px;
-      background: var(--brand-primary);
-      color: white;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .query-btn:hover {
-      background: var(--brand-primary-hover);
-      transform: translateY(-1px);
-    }
-
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(30,26,23,0.6);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .modal-overlay.show {
-      display: flex;
-    }
-
-    .modal {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      max-width: 500px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-lg);
-    }
-
-    .modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-title {
-      font-family: 'Fraunces', serif;
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-
-    .modal-close {
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: var(--surface);
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      color: var(--text-muted);
-      transition: all 0.2s;
-    }
-    .modal-close:hover {
-      background: var(--surface-muted);
-      color: var(--text-primary);
-    }
-
-    .modal-body {
-      padding: 24px;
-    }
-
-    .form-field {
-      margin-bottom: 18px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-
-    .form-input, .form-textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      font-size: 0.9rem;
+      padding: 6px 14px; background: var(--brand-primary); color: white;
+      border: none; border-radius: var(--radius-sm); font-size: 0.8rem;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
       font-family: inherit;
-      background: var(--surface);
-      color: var(--text-primary);
-      transition: all 0.2s;
     }
+    .query-btn:hover { background: var(--brand-primary-hover); transform: translateY(-1px); }
 
+    /* ── QUERY LIST ── */
+    .query-thread { margin-top: 12px; }
+    .query-bubble {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 8px;
+    }
+    .query-bubble-meta { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+    .query-bubble-msg  { font-size: 0.875rem; line-height: 1.55; }
+    .query-reply {
+      background: var(--success-bg); border: 1px solid rgba(46,107,69,0.2);
+      border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 8px;
+    }
+    .query-reply-label { font-size: 0.72rem; color: var(--success); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .query-reply-msg   { font-size: 0.875rem; line-height: 1.55; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(30,26,23,0.6); z-index: 100;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--surface-elevated); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); max-width: 500px; width: 100%;
+      max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      padding: 20px 24px; border-bottom: 1px solid var(--border-subtle);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 800; }
+    .modal-close {
+      width: 32px; height: 32px; border: none; background: var(--surface);
+      border-radius: 50%; cursor: pointer; font-size: 1.3rem; color: var(--text-muted);
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    .modal-close:hover { background: var(--surface-muted); color: var(--text-primary); }
+    .modal-body { padding: 24px; }
+    .form-field { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+    .form-input, .form-textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: var(--radius-md); font-size: 0.9rem; font-family: inherit;
+      background: var(--surface); color: var(--text-primary); transition: all 0.2s;
+    }
     .form-input:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--brand-primary);
+      outline: none; border-color: var(--brand-primary);
       box-shadow: 0 0 0 3px rgba(62,122,84,0.1);
     }
-
-    .form-textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
+    .form-textarea { min-height: 100px; resize: vertical; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
     .btn-primary, .btn-secondary {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: var(--radius-md);
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
+      flex: 1; padding: 12px; border: none; border-radius: var(--radius-md);
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+      font-family: inherit;
     }
-
     .btn-primary {
       background: linear-gradient(135deg, var(--brand-primary), var(--success));
       color: white;
     }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--surface-muted); }
 
-    .btn-secondary {
-      background: var(--surface);
-      color: var(--text-primary);
-      border: 1px solid var(--border);
+    /* ── MOBILE ── */
+    .mob-toggle { display: none; }
+    @media(max-width:900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; padding: 20px 16px; max-width: 100vw; }
+      .stats-row { grid-template-columns: 1fr; gap: 12px; }
+      .mob-toggle {
+        display: flex; position: fixed; top: 20px; left: 20px; z-index: 60;
+        width: 44px; height: 44px; background: var(--surface-elevated);
+        border: 1px solid var(--border); border-radius: var(--radius-md);
+        align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-md);
+      }
+      .page-title { font-size: 1.4rem; }
     }
-    .btn-secondary:hover {
-      background: var(--surface-muted);
+    @media(max-width:600px) {
+      .main { padding: 16px 12px; }
+      .card-body { padding: 16px; }
+      table { font-size: 0.82rem; }
+      th, td { padding: 10px 8px; }
     }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(30,26,23,0.45); z-index: 40; }
+    .overlay.show { display: block; }
   </style>
 </head>
 <body>
-  <!-- Mobile menu toggle -->
-  <div class="mob-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show');">☰</div>
-  <div class="overlay" id="overlay" onclick="document.querySelector('.sidebar').classList.remove('open'); this.classList.remove('show');"></div>
+  <div class="mob-toggle" id="mob-toggle">☰</div>
+  <div class="overlay" id="overlay"></div>
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">Aure<span>lis</span></div>
-    
     <div class="student-mini">
       <div class="avatar" id="student-avatar">S</div>
       <div class="student-mini-info">
@@ -555,35 +297,31 @@
         <div class="student-mini-role">Student</div>
       </div>
     </div>
-
     <nav class="sidebar-nav">
       <div class="nav-item active" data-section="overview">
-        <span class="nav-icon">📊</span>
-        <span>Overview</span>
+        <span class="nav-icon">📊</span><span>Overview</span>
       </div>
       <div class="nav-item" data-section="classes">
-        <span class="nav-icon">📚</span>
-        <span>My Classes</span>
+        <span class="nav-icon">📚</span><span>My Classes</span>
       </div>
       <div class="nav-item" data-section="marks">
-        <span class="nav-icon">📝</span>
-        <span>All Marks</span>
+        <span class="nav-icon">📝</span><span>All Marks</span>
+      </div>
+      <div class="nav-item" data-section="queries">
+        <span class="nav-icon">💬</span><span>My Queries</span>
       </div>
       <div class="nav-item" data-section="profile">
-        <span class="nav-icon">👤</span>
-        <span>Profile</span>
+        <span class="nav-icon">👤</span><span>Profile</span>
       </div>
     </nav>
-
     <button class="logout-btn" onclick="handleLogout()">
-      <span>🚪</span>
-      <span>Logout</span>
+      <span>🚪</span><span>Logout</span>
     </button>
   </aside>
 
-  <!-- Main Content -->
   <main class="main">
-    <!-- Overview Section -->
+
+    <!-- OVERVIEW -->
     <section class="section active" id="section-overview">
       <div class="topbar">
         <div>
@@ -591,35 +329,29 @@
           <p class="page-sub">Your academic performance at a glance</p>
         </div>
       </div>
-
       <div class="stats-row">
         <div class="stat-card green">
           <div class="stat-label">Enrolled Classes</div>
-          <div class="stat-value" id="stat-classes">0</div>
+          <div class="stat-value" id="stat-classes">1</div>
         </div>
         <div class="stat-card blue">
           <div class="stat-label">Total Assessments</div>
-          <div class="stat-value" id="stat-assessments">0</div>
+          <div class="stat-value" id="stat-assessments">—</div>
         </div>
         <div class="stat-card orange">
           <div class="stat-label">Average Score</div>
-          <div class="stat-value" id="stat-average">-</div>
+          <div class="stat-value" id="stat-average">—</div>
         </div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-title">Recent Marks</div>
-        </div>
-        <div class="card-body">
-          <div id="recent-marks-content">
-            <div class="loading">Loading recent marks...</div>
-          </div>
+        <div class="card-header"><div class="card-title">Recent Marks</div></div>
+        <div class="card-body" id="recent-marks-content">
+          <div class="loading">Loading...</div>
         </div>
       </div>
     </section>
 
-    <!-- Classes Section -->
+    <!-- MY CLASSES -->
     <section class="section" id="section-classes">
       <div class="topbar">
         <div>
@@ -627,13 +359,10 @@
           <p class="page-sub">All your enrolled classes</p>
         </div>
       </div>
-
-      <div id="classes-content">
-        <div class="loading">Loading classes...</div>
-      </div>
+      <div id="classes-content"><div class="loading">Loading...</div></div>
     </section>
 
-    <!-- Marks Section -->
+    <!-- ALL MARKS -->
     <section class="section" id="section-marks">
       <div class="topbar">
         <div>
@@ -641,39 +370,53 @@
           <p class="page-sub">Detailed view of all your marks</p>
         </div>
       </div>
-
-      <div id="marks-content">
-        <div class="loading">Loading marks...</div>
-      </div>
+      <div id="marks-content"><div class="loading">Loading...</div></div>
     </section>
 
-    <!-- Profile Section -->
+    <!-- MY QUERIES -->
+    <section class="section" id="section-queries">
+      <div class="topbar">
+        <div>
+          <h1 class="page-title">My Queries</h1>
+          <p class="page-sub">Track your submitted queries and TA replies</p>
+        </div>
+      </div>
+      <div id="queries-content"><div class="loading">Loading...</div></div>
+    </section>
+
+    <!-- PROFILE -->
     <section class="section" id="section-profile">
       <div class="topbar">
         <div>
           <h1 class="page-title">Profile</h1>
-          <p class="page-sub">Manage your account information</p>
+          <p class="page-sub">Your account information</p>
         </div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-title">Personal Information</div>
-        </div>
+        <div class="card-header"><div class="card-title">Personal Information</div></div>
         <div class="card-body">
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap;">
             <div>
-              <strong style="font-size:0.85rem;color:var(--text-muted);">Name</strong>
-              <p id="profile-name" style="margin-top:6px;font-size:0.95rem;">-</p>
+              <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Full Name</div>
+              <div id="profile-name" style="font-size:1rem;font-weight:600;">—</div>
             </div>
             <div>
-              <strong style="font-size:0.85rem;color:var(--text-muted);">Email</strong>
-              <p id="profile-email" style="margin-top:6px;font-size:0.95rem;">-</p>
+              <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Email</div>
+              <div id="profile-email" style="font-size:1rem;">—</div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Roll Number</div>
+              <div id="profile-roll" style="font-size:1rem;font-weight:600;">—</div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Class</div>
+              <div id="profile-class" style="font-size:1rem;">—</div>
             </div>
           </div>
         </div>
       </div>
     </section>
+
   </main>
 
   <!-- Query Modal -->
@@ -686,11 +429,11 @@
       <div class="modal-body">
         <div class="form-field">
           <label class="form-label">Assessment</label>
-          <input type="text" class="form-input" id="query-assessment" readonly/>
+          <input type="text" class="form-input" id="query-assessment-name" readonly/>
         </div>
         <div class="form-field">
-          <label class="form-label">Your Query/Dispute</label>
-          <textarea class="form-textarea" id="query-message" placeholder="Describe your query or concern about this mark..." required></textarea>
+          <label class="form-label">Your Message</label>
+          <textarea class="form-textarea" id="query-message" placeholder="Describe your query or concern about this mark..."></textarea>
         </div>
         <div class="modal-actions">
           <button class="btn-secondary" onclick="closeQueryModal()">Cancel</button>
@@ -702,314 +445,367 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = 'https://tbdslkstlsshbowqtufq.supabase.co';
+    const SUPABASE_URL  = 'https://tbdslkstlsshbowqtufq.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZHNsa3N0bHNzaGJvd3F0dWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1OTUwNzYsImV4cCI6MjEwMzE3MTA3Nn0.nli_eewEq4cWLoo5J6UCRCO8fvcoDwN9AKx4ctHbMs8';
-    
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    let currentStudent = null;
-    let studentEnrollments = [];
+    // ── State ──────────────────────────────────────────────
+    let currentStudent = null;   // full students row (incl. ta_id, class_id)
+    let currentClass   = null;   // classes row
+    let allMarks       = [];     // marks rows enriched with .categoryName
+    let activeQueryCategoryId = null;
 
-    // Navigation
+    // ── Navigation ─────────────────────────────────────────
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', () => {
-        const section = item.dataset.section;
+        const sec = item.dataset.section;
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         item.classList.add('active');
-        document.getElementById(`section-${section}`).classList.add('active');
-        
-        // Close mobile menu
-        document.querySelector('.sidebar').classList.remove('open');
-        document.getElementById('overlay').classList.remove('show');
+        document.getElementById('section-' + sec).classList.add('active');
+        closeMobileMenu();
       });
     });
 
-    async function init() {
-      // Check authentication
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
-        window.location.href = 'student-login.html';
-        return;
-      }
+    function closeMobileMenu() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('show');
+    }
+    document.getElementById('mob-toggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('show');
+    });
+    document.getElementById('overlay').addEventListener('click', closeMobileMenu);
 
-      // Get student data
-      const { data: student, error } = await sb
+    // ── Init ───────────────────────────────────────────────
+    async function init() {
+      // 1. Auth check
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) { window.location.href = 'student-login.html'; return; }
+
+      // 2. Load student row (includes ta_id and class_id)
+      const { data: student, error: stuErr } = await sb
         .from('students')
-        .select(`
-          id, name, roll_no, email, status, class_id,
-          classes!students_class_id_fkey (id, name, sir_name, marks_visible)
-        `)
+        .select('id, name, roll_no, email, status, ta_id, class_id')
         .eq('auth_user_id', session.user.id)
         .single();
 
-      if (error || !student) {
-        console.error('Student not found:', error);
-        alert('Error loading student data. Please try logging in again.');
+      if (stuErr || !student) {
+        console.error('Student lookup failed:', stuErr);
+        alert('Could not load your student record. Please log in again.');
         await sb.auth.signOut();
         window.location.href = 'student-login.html';
         return;
       }
 
       if (student.status !== 'approved') {
-        alert('Your enrollment is pending TA approval');
+        alert('Your enrollment is still pending TA approval.');
         await sb.auth.signOut();
         window.location.href = 'student-login.html';
         return;
       }
 
       currentStudent = student;
-      console.log('Student loaded:', currentStudent);
-      
-      // Update UI
+
+      // 3. Load the class row separately (RLS now allows this via migration 0004)
+      const { data: cls, error: clsErr } = await sb
+        .from('classes')
+        .select('id, name, sir_name, marks_visible')
+        .eq('id', student.class_id)
+        .single();
+
+      if (clsErr) console.warn('Class fetch warning:', clsErr);
+      currentClass = cls || {};
+
+      // 4. Update sidebar / profile UI
       const initials = student.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
       document.getElementById('student-avatar').textContent = initials;
-      document.getElementById('student-name').textContent = student.name;
-      document.getElementById('profile-name').textContent = student.name;
-      document.getElementById('profile-email').textContent = student.email;
+      document.getElementById('student-name').textContent   = student.name;
+      document.getElementById('profile-name').textContent   = student.name;
+      document.getElementById('profile-email').textContent  = student.email || '—';
+      document.getElementById('profile-roll').textContent   = student.roll_no;
+      document.getElementById('profile-class').textContent  = currentClass.name || '—';
 
-      // Load data
-      await loadOverview();
-      await loadClasses();
-      await loadAllMarks();
+      // 5. Load all data
+      await loadMarks();          // loads allMarks, then paints overview + marks section
+      renderClasses();
+      renderOverview();
+      renderAllMarks();
     }
 
-    async function loadOverview() {
-      // Get student's marks - fetch mark categories separately to avoid join issues
-      const { data: marks, error: marksError } = await sb
+    // ── Load marks + category names ────────────────────────
+    async function loadMarks() {
+      // Fetch raw marks rows
+      const { data: marksRaw, error: marksErr } = await sb
         .from('marks')
-        .select('marks, total, category_id')
-        .eq('student_id', currentStudent.id);
-
-      console.log('Marks loaded:', marks, marksError);
-
-      // Fetch category names separately
-      if (marks && marks.length > 0) {
-        const categoryIds = [...new Set(marks.map(m => m.category_id))];
-        const { data: categories } = await sb
-          .from('mark_categories')
-          .select('id, name')
-          .in('id', categoryIds);
-        
-        // Map category names to marks
-        const categoryMap = {};
-        categories?.forEach(c => {
-          categoryMap[c.id] = c.name;
-        });
-        
-        marks.forEach(m => {
-          m.categoryName = categoryMap[m.category_id] || 'Untitled';
-        });
-      }
-
-      const totalAssessments = marks?.length || 0;
-      const validMarks = marks?.filter(m => m.marks !== null) || [];
-      const average = validMarks.length > 0
-        ? Math.round((validMarks.reduce((sum, m) => sum + (m.marks / m.total * 100), 0) / validMarks.length))
-        : 0;
-
-      document.getElementById('stat-classes').textContent = '1'; // For now, single class
-      document.getElementById('stat-assessments').textContent = totalAssessments;
-      document.getElementById('stat-average').textContent = average > 0 ? `${average}%` : '-';
-
-      // Recent marks
-      const recentMarks = marks?.slice(0, 5) || [];
-      const recentContent = document.getElementById('recent-marks-content');
-      
-      if (recentMarks.length === 0) {
-        recentContent.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No marks yet</p></div>';
-      } else {
-        recentContent.innerHTML = `
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Assessment</th>
-                  <th>Score</th>
-                  <th>Percentage</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${recentMarks.map(m => `
-                  <tr>
-                    <td>${m.categoryName || 'Untitled'}</td>
-                    <td>${m.marks ?? '-'} / ${m.total}</td>
-                    <td>${m.marks !== null ? Math.round(m.marks / m.total * 100) + '%' : '-'}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
-      }
-    }
-
-    async function loadClasses() {
-      const classesContent = document.getElementById('classes-content');
-      
-      const classInfo = currentStudent.classes || {};
-      
-      classesContent.innerHTML = `
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">${classInfo.name || 'Class'}</div>
-          </div>
-          <div class="card-body">
-            <p><strong>Teacher:</strong> ${classInfo.sir_name || '-'}</p>
-            <p style="margin-top:8px;"><strong>Roll Number:</strong> ${currentStudent.roll_no}</p>
-            <p style="margin-top:8px;">
-              <strong>Marks Visibility:</strong> 
-              <span class="badge ${classInfo.marks_visible ? 'success' : 'warning'}">
-                ${classInfo.marks_visible ? 'Visible' : 'Hidden'}
-              </span>
-            </p>
-          </div>
-        </div>
-      `;
-    }
-
-    async function loadAllMarks() {
-      const { data: marks, error } = await sb
-        .from('marks')
-        .select('marks, total, category_id, created_at')
+        .select('id, marks, total, category_id, created_at')
         .eq('student_id', currentStudent.id)
         .order('created_at', { ascending: false });
 
-      console.log('All marks loaded:', marks, error);
+      if (marksErr) console.error('Marks fetch error:', marksErr);
 
-      // Fetch category names separately
-      if (marks && marks.length > 0) {
-        const categoryIds = [...new Set(marks.map(m => m.category_id))];
-        const { data: categories } = await sb
-          .from('mark_categories')
-          .select('id, name')
-          .in('id', categoryIds);
-        
-        const categoryMap = {};
-        categories?.forEach(c => {
-          categoryMap[c.id] = c.name;
-        });
-        
-        marks.forEach(m => {
-          m.categoryName = categoryMap[m.category_id] || 'Untitled';
-        });
-      }
-
-      const marksContent = document.getElementById('marks-content');
-
-      if (!marks || marks.length === 0) {
-        marksContent.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No marks available yet</p></div>';
+      if (!marksRaw || marksRaw.length === 0) {
+        allMarks = [];
         return;
       }
 
-      marksContent.innerHTML = `
+      // Fetch category names for those IDs (RLS allows this via migration 0004)
+      const catIds = [...new Set(marksRaw.map(m => m.category_id))];
+      const { data: cats, error: catsErr } = await sb
+        .from('mark_categories')
+        .select('id, name')
+        .in('id', catIds);
+
+      if (catsErr) console.error('Categories fetch error:', catsErr);
+
+      const catMap = {};
+      (cats || []).forEach(c => { catMap[c.id] = c.name; });
+
+      allMarks = marksRaw.map(m => ({
+        ...m,
+        categoryName: catMap[m.category_id] || m.category_id // fallback to ID rather than "Untitled"
+      }));
+    }
+
+    // ── Render Overview ────────────────────────────────────
+    function renderOverview() {
+      const total   = allMarks.length;
+      const graded  = allMarks.filter(m => m.marks !== null);
+      const avg     = graded.length
+        ? Math.round(graded.reduce((s, m) => s + (m.marks / m.total * 100), 0) / graded.length)
+        : null;
+
+      document.getElementById('stat-assessments').textContent = total || '—';
+      document.getElementById('stat-average').textContent     = avg !== null ? avg + '%' : '—';
+
+      const el = document.getElementById('recent-marks-content');
+      const recent = allMarks.slice(0, 5);
+
+      if (recent.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No marks yet</p></div>';
+        return;
+      }
+
+      el.innerHTML = `
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Assessment</th><th>Score</th><th>Percentage</th></tr>
+            </thead>
+            <tbody>
+              ${recent.map(m => `
+                <tr>
+                  <td>${esc(m.categoryName)}</td>
+                  <td>${m.marks ?? '—'} / ${m.total}</td>
+                  <td>${m.marks !== null ? Math.round(m.marks / m.total * 100) + '%' : '—'}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    // ── Render My Classes ──────────────────────────────────
+    function renderClasses() {
+      const el = document.getElementById('classes-content');
+      const visible = currentClass.marks_visible;
+
+      el.innerHTML = `
         <div class="card">
           <div class="card-header">
-            <div class="card-title">All Assessments</div>
+            <div class="card-title">${esc(currentClass.name || 'Class')}</div>
           </div>
+          <div class="card-body" style="display:grid;gap:14px;">
+            <div>
+              <span style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Teacher</span>
+              <p style="margin-top:4px;font-weight:600;">${esc(currentClass.sir_name || '—')}</p>
+            </div>
+            <div>
+              <span style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Roll Number</span>
+              <p style="margin-top:4px;font-weight:600;">${esc(currentStudent.roll_no)}</p>
+            </div>
+            <div>
+              <span style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Marks Visibility</span>
+              <p style="margin-top:4px;">
+                <span class="badge ${visible ? 'success' : 'warning'}">${visible ? 'Visible' : 'Hidden'}</span>
+              </p>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // ── Render All Marks ───────────────────────────────────
+    function renderAllMarks() {
+      const el = document.getElementById('marks-content');
+
+      if (allMarks.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No marks available yet</p></div>';
+        return;
+      }
+
+      const rows = allMarks.map(m => {
+        const pct    = m.marks !== null ? Math.round(m.marks / m.total * 100) : null;
+        const status = pct === null ? 'warning' : pct >= 75 ? 'success' : pct >= 50 ? 'warning' : 'danger';
+        const label  = pct === null ? 'Not Graded' : pct >= 75 ? 'Excellent' : pct >= 50 ? 'Good' : 'Needs Improvement';
+
+        return `
+          <tr>
+            <td>${esc(m.categoryName)}</td>
+            <td>${m.marks ?? '—'}</td>
+            <td>${m.total}</td>
+            <td>${pct !== null ? pct + '%' : '—'}</td>
+            <td><span class="badge ${status}">${label}</span></td>
+            <td>${m.marks !== null
+              ? `<button class="query-btn" data-cat-id="${m.category_id}" data-cat-name="${esc(m.categoryName)}">Raise Query</button>`
+              : '—'}</td>
+          </tr>`;
+      }).join('');
+
+      el.innerHTML = `
+        <div class="card">
+          <div class="card-header"><div class="card-title">All Assessments</div></div>
           <div class="card-body">
             <div class="table-wrapper">
               <table>
                 <thead>
                   <tr>
-                    <th>Assessment</th>
-                    <th>Your Score</th>
-                    <th>Total</th>
-                    <th>Percentage</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>Assessment</th><th>Score</th><th>Total</th>
+                    <th>Percentage</th><th>Status</th><th>Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  ${marks.map(m => {
-                    const percentage = m.marks !== null ? Math.round(m.marks / m.total * 100) : null;
-                    const status = percentage === null ? 'pending' : percentage >= 75 ? 'success' : percentage >= 50 ? 'warning' : 'danger';
-                    const statusText = percentage === null ? 'Not Graded' : percentage >= 75 ? 'Excellent' : percentage >= 50 ? 'Good' : 'Needs Improvement';
-                    
-                    return `
-                      <tr>
-                        <td>${m.categoryName}</td>
-                        <td>${m.marks ?? '-'}</td>
-                        <td>${m.total}</td>
-                        <td>${percentage !== null ? percentage + '%' : '-'}</td>
-                        <td><span class="badge ${status}">${statusText}</span></td>
-                        <td>
-                          ${m.marks !== null ? `<button class="query-btn" onclick="openQueryModal(${m.category_id}, '${m.categoryName}')">Raise Query</button>` : '-'}
-                        </td>
-                      </tr>
-                    `;
-                  }).join('')}
-                </tbody>
+                <tbody>${rows}</tbody>
               </table>
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
+
+      // Attach query button events via JS (no inline onclick = no quoting bugs)
+      el.querySelectorAll('.query-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openQueryModal(btn.dataset.catId, btn.dataset.catName);
+        });
+      });
     }
 
-    async function handleLogout() {
-      if (confirm('Are you sure you want to logout?')) {
-        await sb.auth.signOut();
-        window.location.href = 'student-login.html';
+    // ── Render Queries ─────────────────────────────────────
+    async function renderQueries() {
+      const el = document.getElementById('queries-content');
+      el.innerHTML = '<div class="loading">Loading queries...</div>';
+
+      const { data: queries, error } = await sb
+        .from('mark_queries')
+        .select('id, message, resolved, reply, replied_at, created_at, category_id')
+        .eq('student_id', currentStudent.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load queries</p></div>';
+        console.error('Queries fetch error:', error);
+        return;
       }
+
+      if (!queries || queries.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>No queries submitted yet.<br>Go to <strong>All Marks</strong> to raise one.</p></div>';
+        return;
+      }
+
+      // Build category name map from allMarks
+      const catMap = {};
+      allMarks.forEach(m => { catMap[m.category_id] = m.categoryName; });
+
+      const cards = queries.map(q => {
+        const catName = catMap[q.category_id] || 'Assessment';
+        const date    = new Date(q.created_at).toLocaleString();
+        const statusBadge = q.resolved
+          ? '<span class="badge success">Resolved</span>'
+          : '<span class="badge warning">Pending</span>';
+
+        return `
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">${esc(catName)}</div>
+              ${statusBadge}
+            </div>
+            <div class="card-body">
+              <div class="query-thread">
+                <div class="query-bubble">
+                  <div class="query-bubble-meta">You · ${date}</div>
+                  <div class="query-bubble-msg">${esc(q.message)}</div>
+                </div>
+                ${q.reply ? `
+                  <div class="query-reply">
+                    <div class="query-reply-label">TA Reply · ${new Date(q.replied_at).toLocaleString()}</div>
+                    <div class="query-reply-msg">${esc(q.reply)}</div>
+                  </div>` : `
+                  <div style="font-size:0.8rem;color:var(--text-muted);padding:8px 0;">⏳ Waiting for TA reply...</div>`}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      el.innerHTML = cards;
     }
 
-    // Query Modal Functions
-    let currentQueryCategoryId = null;
+    // Load queries when that tab is clicked
+    document.querySelector('[data-section="queries"]').addEventListener('click', renderQueries);
 
+    // ── Query Modal ────────────────────────────────────────
     function openQueryModal(categoryId, categoryName) {
-      currentQueryCategoryId = categoryId;
-      document.getElementById('query-assessment').value = categoryName;
+      activeQueryCategoryId = categoryId;
+      document.getElementById('query-assessment-name').value = categoryName;
       document.getElementById('query-message').value = '';
       document.getElementById('query-modal').classList.add('show');
     }
 
     function closeQueryModal() {
-      currentQueryCategoryId = null;
+      activeQueryCategoryId = null;
       document.getElementById('query-modal').classList.remove('show');
     }
 
     async function submitQuery() {
       const message = document.getElementById('query-message').value.trim();
-      if (!message) {
-        alert('Please enter your query');
-        return;
-      }
+      if (!message) { alert('Please enter your query message.'); return; }
 
       const btn = document.getElementById('submit-query-btn');
       btn.disabled = true;
       btn.textContent = 'Submitting...';
 
-      try {
-        const { error } = await sb
-          .from('mark_queries')
-          .insert({
-            student_id: currentStudent.id,
-            category_id: currentQueryCategoryId,
-            message: message
-          });
+      const { error } = await sb.from('mark_queries').insert({
+        student_id:  currentStudent.id,
+        ta_id:       currentStudent.ta_id,    // required by RLS
+        category_id: activeQueryCategoryId,
+        message:     message
+      });
 
-        if (error) {
-          console.error('Query submission error:', error);
-          alert('Failed to submit query. Please try again.');
-          btn.disabled = false;
-          btn.textContent = 'Submit Query';
-          return;
-        }
+      btn.disabled = false;
+      btn.textContent = 'Submit Query';
 
-        alert('✅ Query submitted successfully! Your TA will review it.');
-        closeQueryModal();
-        btn.disabled = false;
-        btn.textContent = 'Submit Query';
-      } catch (err) {
-        console.error('Error:', err);
-        alert('Something went wrong. Please try again.');
-        btn.disabled = false;
-        btn.textContent = 'Submit Query';
+      if (error) {
+        console.error('Query insert error:', error);
+        alert('Failed to submit: ' + error.message);
+        return;
+      }
+
+      alert('✅ Query submitted! Your TA will reply shortly.');
+      closeQueryModal();
+    }
+
+    // ── Logout ─────────────────────────────────────────────
+    async function handleLogout() {
+      if (confirm('Log out?')) {
+        await sb.auth.signOut();
+        window.location.href = 'student-login.html';
       }
     }
 
-    // Initialize
+    // ── Utility ────────────────────────────────────────────
+    function esc(str) {
+      if (!str) return '';
+      const d = document.createElement('div');
+      d.textContent = String(str);
+      return d.innerHTML;
+    }
+
+    // ── Start ──────────────────────────────────────────────
     init();
   </script>
 </body>
