@@ -445,7 +445,7 @@
   </div>
 
   <!-- App Modal (replaces browser alert / confirm) -->
-  <div id="app-modal-overlay" onclick="if(event.target===this&&!_modalForce)_modalReject()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(30,26,23,0.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+  <div id="app-modal-overlay" onclick="if(event.target===this)_modalDismiss()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(30,26,23,0.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
     <div id="app-modal-box" style="background:#fff;border:1px solid #e0d8cc;border-radius:14px;box-shadow:0 8px 32px rgba(30,26,23,0.14);width:min(420px,92vw);padding:28px 28px 22px;animation:modalIn .18s ease;">
       <div id="app-modal-icon" style="display:none;width:44px;height:44px;border-radius:50%;align-items:center;justify-content:center;margin:0 auto 16px;"></div>
       <h3 id="app-modal-title" style="font-size:1.1rem;font-weight:700;color:#1E1A17;margin:0 0 8px;text-align:center;"></h3>

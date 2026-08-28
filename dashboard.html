@@ -1209,7 +1209,7 @@
 </main>
 
 <!-- Custom Modal (replaces browser alert / confirm / prompt) -->
-<div id="app-modal-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(30,26,23,0.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;" onclick="if(event.target===this&&!_modalForce)_modalReject()">
+<div id="app-modal-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(30,26,23,0.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;" onclick="if(event.target===this)_modalDismiss()">
   <div id="app-modal-box" style="background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:min(440px,92vw);padding:28px 28px 22px;animation:modalIn .18s ease;">
     <div id="app-modal-icon" style="display:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;"></div>
     <h3 id="app-modal-title" style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;color:var(--text-primary);margin:0 0 8px;text-align:center;"></h3>
@@ -1240,14 +1240,15 @@
 // ══════════════════════════════════════════
 //  MODAL SYSTEM — replaces alert/confirm/prompt
 // ══════════════════════════════════════════
-let _modalResolve, _modalReject, _modalForce = false;
+let _modalResolve = null;
+let _modalForce   = false;
 
 function _showModal({ title, msg, icon, iconBg, iconColor, inputDefault, buttons, force = false }) {
   _modalForce = force;
-  const overlay = document.getElementById('app-modal-overlay');
-  const iconEl  = document.getElementById('app-modal-icon');
-  const titleEl = document.getElementById('app-modal-title');
-  const msgEl   = document.getElementById('app-modal-msg');
+  const overlay   = document.getElementById('app-modal-overlay');
+  const iconEl    = document.getElementById('app-modal-icon');
+  const titleEl   = document.getElementById('app-modal-title');
+  const msgEl     = document.getElementById('app-modal-msg');
   const inputWrap = document.getElementById('app-modal-input-wrap');
   const inputEl   = document.getElementById('app-modal-input');
   const actionsEl = document.getElementById('app-modal-actions');
@@ -1272,22 +1273,30 @@ function _showModal({ title, msg, icon, iconBg, iconColor, inputDefault, buttons
   ).join('');
 
   overlay.classList.add('open');
-  return new Promise((res, rej) => { _modalResolve = res; _modalReject = rej; });
+  return new Promise(res => { _modalResolve = res; });
 }
 
 function _modalAction(role) {
   const inputEl = document.getElementById('app-modal-input');
   document.getElementById('app-modal-overlay').classList.remove('open');
   _modalForce = false;
-  if (role === 'confirm') _modalResolve(true);
-  else if (role === 'input') _modalResolve(inputEl.value);
-  else _modalResolve(false);
+  const resolve = _modalResolve;
+  _modalResolve = null;
+  if (role === 'confirm') resolve(true);
+  else if (role === 'input') resolve(inputEl.value);
+  else resolve(false);
 }
-function _modalReject() {
-  document.getElementById('app-modal-overlay').classList.remove('open');
-  _modalForce = false;
-  _modalResolve(false);
+
+function _modalDismiss() {
+  if (!_modalForce) {
+    document.getElementById('app-modal-overlay').classList.remove('open');
+    _modalForce = false;
+    const resolve = _modalResolve;
+    _modalResolve = null;
+    if (resolve) resolve(false);
+  }
 }
+
 // Enter key submits modals
 document.addEventListener('keydown', e => {
   const overlay = document.getElementById('app-modal-overlay');
@@ -1296,7 +1305,7 @@ document.addEventListener('keydown', e => {
     const inputEl = document.getElementById('app-modal-input');
     _modalAction(inputEl.closest('#app-modal-input-wrap')?.style.display !== 'none' ? 'input' : 'confirm');
   }
-  if (e.key === 'Escape' && !_modalForce) _modalReject();
+  if (e.key === 'Escape') _modalDismiss();
 });
 
 // Drop-in replacements
