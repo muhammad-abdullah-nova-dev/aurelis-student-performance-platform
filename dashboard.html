@@ -1208,6 +1208,24 @@
 
 </main>
 
+<!-- Custom Modal (replaces browser alert / confirm / prompt) -->
+<div id="app-modal-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(30,26,23,0.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;" onclick="if(event.target===this&&!_modalForce)_modalReject()">
+  <div id="app-modal-box" style="background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:min(440px,92vw);padding:28px 28px 22px;animation:modalIn .18s ease;">
+    <div id="app-modal-icon" style="display:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;"></div>
+    <h3 id="app-modal-title" style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;color:var(--text-primary);margin:0 0 8px;text-align:center;"></h3>
+    <p  id="app-modal-msg"   style="font-size:0.88rem;color:var(--text-secondary);margin:0 0 20px;text-align:center;line-height:1.55;white-space:pre-line;"></p>
+    <div id="app-modal-input-wrap" style="display:none;margin-bottom:16px;">
+      <input id="app-modal-input" class="form-input" style="width:100%;box-sizing:border-box;" autocomplete="off"/>
+    </div>
+    <div id="app-modal-actions" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;"></div>
+  </div>
+</div>
+<style>
+@keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(6px); } to { opacity:1; transform:none; } }
+#app-modal-overlay { display:none!important; }
+#app-modal-overlay.open { display:flex!important; }
+</style>
+
 <!-- Toast -->
 <div class="toast" id="toast">
   <span id="toast-icon">✅</span>
@@ -1219,6 +1237,94 @@
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ══════════════════════════════════════════
+//  MODAL SYSTEM — replaces alert/confirm/prompt
+// ══════════════════════════════════════════
+let _modalResolve, _modalReject, _modalForce = false;
+
+function _showModal({ title, msg, icon, iconBg, iconColor, inputDefault, buttons, force = false }) {
+  _modalForce = force;
+  const overlay = document.getElementById('app-modal-overlay');
+  const iconEl  = document.getElementById('app-modal-icon');
+  const titleEl = document.getElementById('app-modal-title');
+  const msgEl   = document.getElementById('app-modal-msg');
+  const inputWrap = document.getElementById('app-modal-input-wrap');
+  const inputEl   = document.getElementById('app-modal-input');
+  const actionsEl = document.getElementById('app-modal-actions');
+
+  titleEl.textContent = title || '';
+  msgEl.textContent   = msg   || '';
+
+  if (icon) {
+    iconEl.style.display = 'flex';
+    iconEl.style.background = iconBg || 'var(--surface-muted)';
+    iconEl.innerHTML = `<span style="font-size:1.3rem;color:${iconColor||'var(--text-primary)'};">${icon}</span>`;
+  } else { iconEl.style.display = 'none'; }
+
+  if (inputDefault !== undefined) {
+    inputWrap.style.display = 'block';
+    inputEl.value = inputDefault;
+    setTimeout(() => { inputEl.focus(); inputEl.select(); }, 80);
+  } else { inputWrap.style.display = 'none'; }
+
+  actionsEl.innerHTML = buttons.map(b =>
+    `<button class="btn ${b.cls||'btn-ghost'}" style="min-width:96px;" onclick="_modalAction('${b.role}')">${b.label}</button>`
+  ).join('');
+
+  overlay.classList.add('open');
+  return new Promise((res, rej) => { _modalResolve = res; _modalReject = rej; });
+}
+
+function _modalAction(role) {
+  const inputEl = document.getElementById('app-modal-input');
+  document.getElementById('app-modal-overlay').classList.remove('open');
+  _modalForce = false;
+  if (role === 'confirm') _modalResolve(true);
+  else if (role === 'input') _modalResolve(inputEl.value);
+  else _modalResolve(false);
+}
+function _modalReject() {
+  document.getElementById('app-modal-overlay').classList.remove('open');
+  _modalForce = false;
+  _modalResolve(false);
+}
+// Enter key submits modals
+document.addEventListener('keydown', e => {
+  const overlay = document.getElementById('app-modal-overlay');
+  if (!overlay?.classList.contains('open')) return;
+  if (e.key === 'Enter') {
+    const inputEl = document.getElementById('app-modal-input');
+    _modalAction(inputEl.closest('#app-modal-input-wrap')?.style.display !== 'none' ? 'input' : 'confirm');
+  }
+  if (e.key === 'Escape' && !_modalForce) _modalReject();
+});
+
+// Drop-in replacements
+function showAlert(msg, { title = 'Notice', icon = 'ℹ️', iconBg = 'var(--surface-muted)' } = {}) {
+  return _showModal({ title, msg, icon, iconBg, buttons: [{ label: 'OK', cls: 'btn-primary', role: 'confirm' }], force: true });
+}
+function showConfirm(msg, { title = 'Are you sure?', confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger = false } = {}) {
+  return _showModal({
+    title, msg,
+    icon: danger ? '🗑️' : '❓',
+    iconBg: danger ? 'var(--danger-bg)' : 'var(--warning-bg)',
+    buttons: [
+      { label: cancelLabel,  cls: 'btn-ghost',   role: 'cancel'  },
+      { label: confirmLabel, cls: danger ? 'btn-danger' : 'btn-primary', role: 'confirm' },
+    ],
+  });
+}
+function showPrompt(msg, defaultVal = '', { title = 'Enter value' } = {}) {
+  return _showModal({
+    title, msg,
+    inputDefault: defaultVal,
+    buttons: [
+      { label: 'Cancel', cls: 'btn-ghost',   role: 'cancel' },
+      { label: 'OK',     cls: 'btn-primary', role: 'input'  },
+    ],
+  });
+}
+
 // ══════════════════════════════════════════
 //  CONFIG — Replace with your values
 // ══════════════════════════════════════════
@@ -1385,9 +1491,9 @@ async function switchClass(classId) {
 }
 
 async function addNewClass() {
-  const name = prompt('New class name (e.g. "Data Structures — Section B"):');
+  const name = await showPrompt('Class name (e.g. "Data Structures — Section B"):', '', { title: 'New Class' });
   if (!name || !name.trim()) return;
-  const sir = prompt("Sir's name for this class (optional):") || null;
+  const sir = await showPrompt("Sir's name for this class (optional):", '', { title: 'Teacher Name' }) || null;
 
   const { data: tokenData, error: tokenErr } = await sb.rpc('generate_class_token');
   if (tokenErr) { showToast('❌', 'Failed to create class.'); return; }
@@ -1655,9 +1761,9 @@ async function addMarksColumn() {
 async function renameColumn(categoryId) {
   const col = marksColumns.find(c => c.id === categoryId);
   if (!col) return;
-  const newName = prompt('Column name:', col.name);
+  const newName = await showPrompt('Column name:', col.name, { title: 'Rename Column' });
   if (!newName || !newName.trim()) return;
-  const newTotalRaw = prompt('Total marks for this column:', col.total);
+  const newTotalRaw = await showPrompt('Total marks for this column:', String(col.total), { title: 'Total Marks' });
   const newTotal = parseFloat(newTotalRaw);
   if (isNaN(newTotal) || newTotal <= 0) { showToast('⚠️', 'Total marks must be a positive number.'); return; }
 
@@ -1679,7 +1785,10 @@ async function deleteColumn(categoryId) {
   const col = marksColumns.find(c => c.id === categoryId);
   if (!col) return;
 
-  const confirmed = confirm(`Delete column "${col.name}"?\n\nThis will permanently remove all marks entered under this column. This cannot be undone.`);
+  const confirmed = await showConfirm(
+    `This will permanently remove all marks entered under "${col.name}". This cannot be undone.`,
+    { title: `Delete "${col.name}"?`, confirmLabel: 'Delete', danger: true }
+  );
   if (!confirmed) return;
 
   // Delete all marks for this category first, then the category itself

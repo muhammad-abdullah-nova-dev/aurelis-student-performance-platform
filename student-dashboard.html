@@ -444,8 +444,77 @@
     </div>
   </div>
 
+  <!-- App Modal (replaces browser alert / confirm) -->
+  <div id="app-modal-overlay" onclick="if(event.target===this&&!_modalForce)_modalReject()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(30,26,23,0.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+    <div id="app-modal-box" style="background:#fff;border:1px solid #e0d8cc;border-radius:14px;box-shadow:0 8px 32px rgba(30,26,23,0.14);width:min(420px,92vw);padding:28px 28px 22px;animation:modalIn .18s ease;">
+      <div id="app-modal-icon" style="display:none;width:44px;height:44px;border-radius:50%;align-items:center;justify-content:center;margin:0 auto 16px;"></div>
+      <h3 id="app-modal-title" style="font-size:1.1rem;font-weight:700;color:#1E1A17;margin:0 0 8px;text-align:center;"></h3>
+      <p  id="app-modal-msg"   style="font-size:0.88rem;color:#4A3F36;margin:0 0 20px;text-align:center;line-height:1.55;white-space:pre-line;"></p>
+      <div id="app-modal-actions" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;"></div>
+    </div>
+  </div>
+  <style>
+    @keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(6px); } to { opacity:1; transform:none; } }
+    #app-modal-overlay { display:none!important; }
+    #app-modal-overlay.open { display:flex!important; }
+    #app-modal-box .m-btn { padding:9px 22px;border-radius:8px;border:none;font-size:0.88rem;font-weight:600;cursor:pointer;transition:background .15s; }
+    #app-modal-box .m-btn-primary { background:#C63D2F;color:#fff; }
+    #app-modal-box .m-btn-primary:hover { background:#B03527; }
+    #app-modal-box .m-btn-ghost { background:transparent;color:#4A3F36;border:1px solid #DDD4C0; }
+    #app-modal-box .m-btn-ghost:hover { background:#F0E8D8; }
+    #app-modal-box .m-btn-danger { background:rgba(198,61,47,0.1);color:#C63D2F;border:1px solid rgba(198,61,47,0.3); }
+    #app-modal-box .m-btn-danger:hover { background:rgba(198,61,47,0.18); }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // ── Modal System ──────────────────────────────────────────
+    let _modalResolve, _modalForce = false;
+    function _showModal({ title, msg, icon, iconBg, buttons, force = false }) {
+      _modalForce = force;
+      const o  = document.getElementById('app-modal-overlay');
+      const iE = document.getElementById('app-modal-icon');
+      document.getElementById('app-modal-title').textContent = title || '';
+      document.getElementById('app-modal-msg').textContent   = msg   || '';
+      if (icon) {
+        iE.style.display = 'flex'; iE.style.background = iconBg || '#f0e8d8';
+        iE.innerHTML = `<span style="font-size:1.3rem;">${icon}</span>`;
+      } else { iE.style.display = 'none'; }
+      document.getElementById('app-modal-actions').innerHTML = buttons.map(b =>
+        `<button class="m-btn ${b.cls}" onclick="_mAct('${b.role}')">${b.label}</button>`
+      ).join('');
+      o.classList.add('open');
+      return new Promise(res => { _modalResolve = res; });
+    }
+    function _mAct(role) {
+      document.getElementById('app-modal-overlay').classList.remove('open');
+      _modalForce = false;
+      _modalResolve(role === 'confirm');
+    }
+    function _modalReject() {
+      document.getElementById('app-modal-overlay').classList.remove('open');
+      _modalForce = false;
+      _modalResolve(false);
+    }
+    document.addEventListener('keydown', e => {
+      const o = document.getElementById('app-modal-overlay');
+      if (!o?.classList.contains('open')) return;
+      if (e.key === 'Enter') _mAct('confirm');
+      if (e.key === 'Escape' && !_modalForce) _modalReject();
+    });
+    function showAlert(msg, { title = 'Notice' } = {}) {
+      return _showModal({ title, msg, icon: 'ℹ️', force: true,
+        buttons: [{ label: 'OK', cls: 'm-btn-primary', role: 'confirm' }] });
+    }
+    function showConfirm(msg, { title = 'Are you sure?', confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger = false } = {}) {
+      return _showModal({ title, msg, icon: danger ? '🗑️' : '❓',
+        iconBg: danger ? 'rgba(198,61,47,0.1)' : 'rgba(217,164,65,0.12)',
+        buttons: [
+          { label: cancelLabel,  cls: 'm-btn-ghost',  role: 'cancel'  },
+          { label: confirmLabel, cls: danger ? 'm-btn-danger' : 'm-btn-primary', role: 'confirm' },
+        ] });
+    }
+
     const SUPABASE_URL  = 'https://tbdslkstlsshbowqtufq.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZHNsa3N0bHNzaGJvd3F0dWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1OTUwNzYsImV4cCI6MjEwMzE3MTA3Nn0.nli_eewEq4cWLoo5J6UCRCO8fvcoDwN9AKx4ctHbMs8';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -493,14 +562,14 @@
 
       if (stuErr || !student) {
         console.error('Student lookup failed:', stuErr);
-        alert('Could not load your student record. Please log in again.');
+        await showAlert('Could not load your student record. Please log in again.', { title: 'Login Error' });
         await sb.auth.signOut();
         window.location.href = 'student-login.html';
         return;
       }
 
       if (student.status !== 'approved') {
-        alert('Your enrollment is still pending TA approval.');
+        await showAlert('Your enrollment is still pending TA approval.', { title: 'Not Approved Yet' });
         await sb.auth.signOut();
         window.location.href = 'student-login.html';
         return;
@@ -590,8 +659,7 @@
         return;
       }
 
-      el.innerHTML = `
-        <div class="table-wrapper">
+      el.innerHTML = `<div class="table-wrapper">
           <table>
             <thead>
               <tr><th>Assessment</th><th>Score</th><th>Percentage</th></tr>
@@ -766,7 +834,7 @@
 
     async function submitQuery() {
       const message = document.getElementById('query-message').value.trim();
-      if (!message) { alert('Please enter your query message.'); return; }
+      if (!message) { await showAlert('Please enter your query message.', { title: 'Query Empty' }); return; }
 
       const btn = document.getElementById('submit-query-btn');
       btn.disabled = true;
@@ -774,7 +842,7 @@
 
       const { error } = await sb.from('mark_queries').insert({
         student_id:  currentStudent.id,
-        ta_id:       currentStudent.ta_id,    // required by RLS
+        ta_id:       currentStudent.ta_id,
         category_id: activeQueryCategoryId,
         message:     message
       });
@@ -784,17 +852,18 @@
 
       if (error) {
         console.error('Query insert error:', error);
-        alert('Failed to submit: ' + error.message);
+        await showAlert('Failed to submit: ' + error.message, { title: 'Submission Failed' });
         return;
       }
 
-      alert('✅ Query submitted! Your TA will reply shortly.');
+      await showAlert('Query submitted! Your TA will reply shortly.', { title: '✅ Query Sent' });
       closeQueryModal();
     }
 
     // ── Logout ─────────────────────────────────────────────
     async function handleLogout() {
-      if (confirm('Log out?')) {
+      const ok = await showConfirm('Are you sure you want to log out?', { title: 'Log Out', confirmLabel: 'Log Out', cancelLabel: 'Cancel' });
+      if (ok) {
         await sb.auth.signOut();
         window.location.href = 'student-login.html';
       }
