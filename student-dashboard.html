@@ -382,6 +382,161 @@
 
     .overlay { display:none; position:fixed; inset:0; background:rgba(30,26,23,0.45); z-index:40; }
     .overlay.show { display:block; }
+
+    /* ── QUERY BUTTON & MODAL ── */
+    .query-btn {
+      padding: 6px 12px;
+      background: var(--brand-primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .query-btn:hover {
+      background: var(--brand-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(30,26,23,0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-family: 'Fraunces', serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--surface);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .modal-close:hover {
+      background: var(--surface-muted);
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .form-field {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(62,122,84,0.1);
+    }
+
+    .form-textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn-primary, .btn-secondary {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand-primary), var(--success));
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-muted);
+    }
   </style>
 </head>
 <body>
@@ -521,6 +676,30 @@
     </section>
   </main>
 
+  <!-- Query Modal -->
+  <div class="modal-overlay" id="query-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Raise a Query</div>
+        <button class="modal-close" onclick="closeQueryModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label class="form-label">Assessment</label>
+          <input type="text" class="form-input" id="query-assessment" readonly/>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Your Query/Dispute</label>
+          <textarea class="form-textarea" id="query-message" placeholder="Describe your query or concern about this mark..." required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeQueryModal()">Cancel</button>
+          <button class="btn-primary" id="submit-query-btn" onclick="submitQuery()">Submit Query</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = 'https://tbdslkstlsshbowqtufq.supabase.co';
@@ -558,14 +737,15 @@
       const { data: student, error } = await sb
         .from('students')
         .select(`
-          id, name, roll_no, email, status,
-          classes (id, name, sir_name, marks_visible)
+          id, name, roll_no, email, status, class_id,
+          classes!students_class_id_fkey (id, name, sir_name, marks_visible)
         `)
         .eq('auth_user_id', session.user.id)
         .single();
 
       if (error || !student) {
         console.error('Student not found:', error);
+        alert('Error loading student data. Please try logging in again.');
         await sb.auth.signOut();
         window.location.href = 'student-login.html';
         return;
@@ -579,6 +759,7 @@
       }
 
       currentStudent = student;
+      console.log('Student loaded:', currentStudent);
       
       // Update UI
       const initials = student.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -594,11 +775,32 @@
     }
 
     async function loadOverview() {
-      // Get student's marks
-      const { data: marks } = await sb
+      // Get student's marks - fetch mark categories separately to avoid join issues
+      const { data: marks, error: marksError } = await sb
         .from('marks')
-        .select('marks, total, category_id, mark_categories(name), student_id')
+        .select('marks, total, category_id')
         .eq('student_id', currentStudent.id);
+
+      console.log('Marks loaded:', marks, marksError);
+
+      // Fetch category names separately
+      if (marks && marks.length > 0) {
+        const categoryIds = [...new Set(marks.map(m => m.category_id))];
+        const { data: categories } = await sb
+          .from('mark_categories')
+          .select('id, name')
+          .in('id', categoryIds);
+        
+        // Map category names to marks
+        const categoryMap = {};
+        categories?.forEach(c => {
+          categoryMap[c.id] = c.name;
+        });
+        
+        marks.forEach(m => {
+          m.categoryName = categoryMap[m.category_id] || 'Untitled';
+        });
+      }
 
       const totalAssessments = marks?.length || 0;
       const validMarks = marks?.filter(m => m.marks !== null) || [];
@@ -630,7 +832,7 @@
               <tbody>
                 ${recentMarks.map(m => `
                   <tr>
-                    <td>${m.mark_categories?.name || 'Untitled'}</td>
+                    <td>${m.categoryName || 'Untitled'}</td>
                     <td>${m.marks ?? '-'} / ${m.total}</td>
                     <td>${m.marks !== null ? Math.round(m.marks / m.total * 100) + '%' : '-'}</td>
                   </tr>
@@ -645,18 +847,20 @@
     async function loadClasses() {
       const classesContent = document.getElementById('classes-content');
       
+      const classInfo = currentStudent.classes || {};
+      
       classesContent.innerHTML = `
         <div class="card">
           <div class="card-header">
-            <div class="card-title">${currentStudent.classes.name}</div>
+            <div class="card-title">${classInfo.name || 'Class'}</div>
           </div>
           <div class="card-body">
-            <p><strong>Teacher:</strong> ${currentStudent.classes.sir_name}</p>
+            <p><strong>Teacher:</strong> ${classInfo.sir_name || '-'}</p>
             <p style="margin-top:8px;"><strong>Roll Number:</strong> ${currentStudent.roll_no}</p>
             <p style="margin-top:8px;">
               <strong>Marks Visibility:</strong> 
-              <span class="badge ${currentStudent.classes.marks_visible ? 'success' : 'warning'}">
-                ${currentStudent.classes.marks_visible ? 'Visible' : 'Hidden'}
+              <span class="badge ${classInfo.marks_visible ? 'success' : 'warning'}">
+                ${classInfo.marks_visible ? 'Visible' : 'Hidden'}
               </span>
             </p>
           </div>
@@ -665,11 +869,31 @@
     }
 
     async function loadAllMarks() {
-      const { data: marks } = await sb
+      const { data: marks, error } = await sb
         .from('marks')
-        .select('marks, total, category_id, mark_categories(name)')
+        .select('marks, total, category_id, created_at')
         .eq('student_id', currentStudent.id)
         .order('created_at', { ascending: false });
+
+      console.log('All marks loaded:', marks, error);
+
+      // Fetch category names separately
+      if (marks && marks.length > 0) {
+        const categoryIds = [...new Set(marks.map(m => m.category_id))];
+        const { data: categories } = await sb
+          .from('mark_categories')
+          .select('id, name')
+          .in('id', categoryIds);
+        
+        const categoryMap = {};
+        categories?.forEach(c => {
+          categoryMap[c.id] = c.name;
+        });
+        
+        marks.forEach(m => {
+          m.categoryName = categoryMap[m.category_id] || 'Untitled';
+        });
+      }
 
       const marksContent = document.getElementById('marks-content');
 
@@ -693,6 +917,7 @@
                     <th>Total</th>
                     <th>Percentage</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -703,11 +928,14 @@
                     
                     return `
                       <tr>
-                        <td>${m.mark_categories?.name || 'Untitled'}</td>
+                        <td>${m.categoryName}</td>
                         <td>${m.marks ?? '-'}</td>
                         <td>${m.total}</td>
                         <td>${percentage !== null ? percentage + '%' : '-'}</td>
                         <td><span class="badge ${status}">${statusText}</span></td>
+                        <td>
+                          ${m.marks !== null ? `<button class="query-btn" onclick="openQueryModal(${m.category_id}, '${m.categoryName}')">Raise Query</button>` : '-'}
+                        </td>
                       </tr>
                     `;
                   }).join('')}
@@ -723,6 +951,61 @@
       if (confirm('Are you sure you want to logout?')) {
         await sb.auth.signOut();
         window.location.href = 'student-login.html';
+      }
+    }
+
+    // Query Modal Functions
+    let currentQueryCategoryId = null;
+
+    function openQueryModal(categoryId, categoryName) {
+      currentQueryCategoryId = categoryId;
+      document.getElementById('query-assessment').value = categoryName;
+      document.getElementById('query-message').value = '';
+      document.getElementById('query-modal').classList.add('show');
+    }
+
+    function closeQueryModal() {
+      currentQueryCategoryId = null;
+      document.getElementById('query-modal').classList.remove('show');
+    }
+
+    async function submitQuery() {
+      const message = document.getElementById('query-message').value.trim();
+      if (!message) {
+        alert('Please enter your query');
+        return;
+      }
+
+      const btn = document.getElementById('submit-query-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+
+      try {
+        const { error } = await sb
+          .from('mark_queries')
+          .insert({
+            student_id: currentStudent.id,
+            category_id: currentQueryCategoryId,
+            message: message
+          });
+
+        if (error) {
+          console.error('Query submission error:', error);
+          alert('Failed to submit query. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Submit Query';
+          return;
+        }
+
+        alert('✅ Query submitted successfully! Your TA will review it.');
+        closeQueryModal();
+        btn.disabled = false;
+        btn.textContent = 'Submit Query';
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Submit Query';
       }
     }
 
