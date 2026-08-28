@@ -369,14 +369,17 @@
   .feature-card:hover::before{ opacity:1; }
   .feature-icon{
     width:48px; height:48px; border-radius:var(--radius-md);
-    background:var(--danger-bg); border:1px solid var(--danger-border);
+    background:var(--surface); border:1px solid var(--border);
     display:flex; align-items:center; justify-content:center;
-    font-size:1.3rem; margin-bottom:18px;
+    color: var(--brand-primary);
+    margin-bottom:18px;
     box-shadow: var(--shadow-xs);
-    transition: transform 0.3s;
+    transition: transform 0.3s, background 0.3s;
   }
   .feature-card:hover .feature-icon {
     transform: scale(1.08);
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
   }
   .feature-card h3{
     font-family:'Fraunces',serif; font-size:1.08rem; font-weight:800;
@@ -538,27 +541,27 @@
 
   <div class="features-grid">
     <div class="feature-card reveal">
-      <div class="feature-icon">📊</div>
+      <div class="feature-icon"><i data-lucide="bar-chart-2" style="width:24px;height:24px;"></i></div>
       <h3>Marks that sync themselves</h3>
       <p>Type a mark in the portal and it lands in your Google Sheet automatically. No exporting, no copy-pasting.</p>
     </div>
     <div class="feature-card reveal">
-      <div class="feature-icon">🔗</div>
+      <div class="feature-icon"><i data-lucide="link-2" style="width:24px;height:24px;"></i></div>
       <h3>One link for your whole class</h3>
       <p>Share a single invite link. Students see your name and your Sir's name, then enter their own roll number.</p>
     </div>
     <div class="feature-card reveal">
-      <div class="feature-icon">✅</div>
+      <div class="feature-icon"><i data-lucide="shield-check" style="width:24px;height:24px;"></i></div>
       <h3>You decide who's in</h3>
       <p>Every student who registers waits for your approval before they land on your roster — no surprises.</p>
     </div>
     <div class="feature-card reveal">
-      <div class="feature-icon">🔔</div>
+      <div class="feature-icon"><i data-lucide="bell" style="width:24px;height:24px;"></i></div>
       <h3>Nobody falls through the cracks</h3>
       <p>Keep track of who's missing marks or attendance, without digging through a spreadsheet to find them.</p>
     </div>
     <div class="feature-card reveal">
-      <div class="feature-icon">🗄️</div>
+      <div class="feature-icon"><i data-lucide="cloud" style="width:24px;height:24px;"></i></div>
       <h3>Stored safely, always there</h3>
       <p>Every roster, mark, and record lives securely in the cloud — open your dashboard from any device.</p>
     </div>
