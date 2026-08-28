@@ -371,7 +371,7 @@
         <div class="field">
           <label>Email Address</label>
           <div class="input-wrap">
-            <span class="icon">✉️</span>
+            <i data-lucide="mail" class="icon" style="width:16px;height:16px;"></i>
             <input type="email" id="login-email" placeholder="ta@university.edu"/>
           </div>
         </div>
@@ -380,7 +380,7 @@
           <div class="input-wrap">
             <span class="icon"><i data-lucide="lock" style="width:18px;height:18px;"></i></span>
             <input type="password" id="login-password" placeholder="Enter your password"/>
-            <button class="pw-toggle" onclick="togglePw('login-password', this)">👁️</button>
+            <button class="pw-toggle" onclick="togglePw('login-password', this)"><i data-lucide="eye" style="width:16px;height:16px;"></i></button>
           </div>
         </div>
         <div class="forgot"><a onclick="showForgotPanel()" style="cursor:pointer">Forgot password?</a></div>
@@ -400,7 +400,7 @@
         <div class="field">
           <label>Email</label>
           <div class="input-wrap">
-            <span class="icon">✉️</span>
+            <i data-lucide="mail" class="icon" style="width:16px;height:16px;"></i>
             <input type="email" id="forgot-email" placeholder="ta@university.edu"/>
           </div>
         </div>
@@ -434,7 +434,7 @@
             <div class="field">
               <label>Sir's Name</label>
               <div class="input-wrap">
-                <span class="icon"></span>
+                <i data-lucide="mail" style="width:16px;height:16px;"></i>
                 <input type="text" id="signup-sir-name" placeholder="e.g. Sir Name"/>
               </div>
             </div>
@@ -451,7 +451,7 @@
           <div class="field">
             <label>Your Email</label>
             <div class="input-wrap">
-              <span class="icon">✉️</span>
+              <i data-lucide="mail" class="icon" style="width:16px;height:16px;"></i>
               <input type="email" id="signup-email" placeholder="your@email.com"/>
             </div>
           </div>
@@ -461,7 +461,7 @@
             <div class="input-wrap">
               <span class="icon"><i data-lucide="lock" style="width:18px;height:18px;"></i></span>
               <input type="password" id="signup-password" placeholder="Min 8 characters" oninput="checkStrength(this.value)"/>
-              <button class="pw-toggle" onclick="togglePw('signup-password', this)">👁️</button>
+              <button class="pw-toggle" onclick="togglePw('signup-password', this)"><i data-lucide="eye" style="width:16px;height:16px;"></i></button>
             </div>
             <div class="strength-wrap" id="strength-wrap">
               <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
@@ -537,7 +537,8 @@
     function togglePw(id, btn) {
       const inp = document.getElementById(id);
       inp.type = inp.type === 'password' ? 'text' : 'password';
-      btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+      btn.textContent = inp.type === 'password' ? '' : '';
+      lucide.createIcons();
     }
 
     function checkStrength(val) {
@@ -684,8 +685,9 @@
   </script>
 
   <div style="position:fixed;bottom:12px;left:0;right:0;text-align:center;font-size:0.78rem;color:var(--text-muted);z-index:2;">
-    Need help? <i data-lucide="mail" style="width:18px;height:18px;"></i> <a href="mailto:muhammed.abdullah.coder@gmail.com" style="color:var(--brand-primary);text-decoration:none;">muhammed.abdullah.coder@gmail.com</a>
-    &nbsp;·&nbsp; 💬 <a href="https://wa.me/923226334814" target="_blank" style="color:var(--brand-primary);text-decoration:none;">+92 322 6334814</a>
+    Need help? <i data-lucide="mail" style="width:14px;height:14px;vertical-align:middle;"></i> <a href="mailto:muhammed.abdullah.coder@gmail.com" style="color:var(--brand-primary);text-decoration:none;">muhammed.abdullah.coder@gmail.com</a>
+    &nbsp;·&nbsp; <i data-lucide="message-circle" style="width:14px;height:14px;vertical-align:middle;"></i> <a href="https://wa.me/923226334814" target="_blank" style="color:var(--brand-primary);text-decoration:none;">+92 322 6334814</a>
   </div>
+<script>if(typeof lucide!=="undefined")lucide.createIcons();</script>
 </body>
 </html>
