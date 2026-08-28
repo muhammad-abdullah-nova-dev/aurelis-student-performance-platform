@@ -531,7 +531,10 @@
       await loadMarks();          // loads allMarks, then paints overview + marks section
       renderClasses();
       renderOverview();
-      renderAllMarks();`n      lucide.createIcons();
+      renderAllMarks();
+      
+      // Initialize Lucide icons
+      lucide.createIcons();
     }
 
     // ── Load marks + category names ────────────────────────
@@ -610,8 +613,7 @@
       const el = document.getElementById('classes-content');
       const visible = currentClass.marks_visible;
 
-      el.innerHTML = `
-        <div class="card">
+      el.innerHTML = `<div class="card">
           <div class="card-header">
             <div class="card-title">${esc(currentClass.name || 'Class')}</div>
           </div>
@@ -656,13 +658,12 @@
             <td>${pct !== null ? pct + '%' : '—'}</td>
             <td><span class="badge ${status}">${label}</span></td>
             <td>${m.marks !== null
-              ? `<button class="query-btn" data-cat-id="${m.category_id}" data-cat-name="${esc(m.categoryName)}"><i data-lucide="message-square" style="width:14px;height:14px;margin-right:4px;"></i>Raise Query</button>`
+              ? `<button class="query-btn" data-cat-id="${m.category_id}" data-cat-name="${esc(m.categoryName)}"><i data-lucide="message-square" style="width:14px;height:14px;margin-right:6px;"></i>Raise Query</button>`
               : '—'}</td>
           </tr>`;
       }).join('');
 
-      el.innerHTML = `
-        <div class="card">
+      el.innerHTML = `<div class="card">
           <div class="card-header"><div class="card-title">All Assessments</div></div>
           <div class="card-body">
             <div class="table-wrapper">
@@ -744,6 +745,7 @@
       }).join('');
 
       el.innerHTML = cards;
+      lucide.createIcons();
     }
 
     // Load queries when that tab is clicked
