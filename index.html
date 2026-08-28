@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -6,6 +6,7 @@
 <title>Aurelis — Teaching Assistant Management System</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
 <style>
   /* ── DESIGN TOKENS ── */
   :root{
@@ -485,6 +486,7 @@
 </style>
 </head>
 <body>
+<script>document.addEventListener('DOMContentLoaded', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });</script>
 
 <nav>
   <div class="logo">Aure<span>lis</span></div>
@@ -561,7 +563,7 @@
       <p>Every roster, mark, and record lives securely in the cloud — open your dashboard from any device.</p>
     </div>
     <div class="feature-card reveal">
-      <div class="feature-icon">👤</div>
+      <div class="feature-icon"><i data-lucide="user-check" style="width:24px;height:24px;"></i></div>
       <h3>Your class, clearly labelled</h3>
       <p>Your name and your Sir's name show right on the join page, so students always know whose class it is.</p>
     </div>
