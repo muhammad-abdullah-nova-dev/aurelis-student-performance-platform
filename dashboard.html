@@ -1111,6 +1111,14 @@
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
       <input class="form-input" id="gradebook-search" placeholder="🔍 Search by name or roll no..." style="max-width:320px;flex:1;min-width:200px;" oninput="renderGradebook()"/>
       <button class="btn btn-ghost btn-sm" id="marks-visibility-btn" onclick="toggleMarksVisibility()">👁️ Loading...</button>
+      <!-- hidden file input for Excel import -->
+      <input type="file" id="excel-import-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="importFromExcel(this)"/>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('excel-import-input').click()" title="Upload an Excel / CSV sheet — columns become mark categories, rows are matched by Roll No.">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import Excel
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="exportToExcel()" title="Download the full gradebook as an Excel file">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export Excel
+      </button>
     </div>
 
     <div class="card gradebook-card">
@@ -1206,6 +1214,8 @@
   <span id="toast-msg">Done!</span>
 </div>
 
+<!-- SheetJS — Excel import / export -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -1948,6 +1958,170 @@ async function syncToGoogleSheets(approvedStudents) {
   } catch (err) {
     showToast('⚠️', 'Sync failed: ' + err.message);
   }
+}
+
+// ── EXCEL IMPORT ──
+// Expected sheet layout (first row = headers):
+//   Name | Roll No. | Quiz 1 | Quiz 2 | Assignment 1 | …
+//   (columns beyond Roll No. become mark categories)
+//   (rows are matched to existing students by roll number, case-insensitive)
+async function importFromExcel(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = ''; // reset so the same file can be re-imported if needed
+
+  if (!currentClass) { showToast('⚠️', 'Select a class first.'); return; }
+
+  let workbook;
+  try {
+    const buf = await file.arrayBuffer();
+    workbook = XLSX.read(buf, { type: 'array' });
+  } catch (e) {
+    showToast('❌', 'Could not read file: ' + e.message);
+    return;
+  }
+
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  // Convert to array-of-arrays (header row included)
+  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+  if (!rows.length) { showToast('⚠️', 'The sheet appears to be empty.'); return; }
+
+  const header = rows[0].map(h => String(h).trim());
+
+  // Locate Name and Roll No. columns (case-insensitive, flexible naming)
+  const nameColIdx = header.findIndex(h => /^name$/i.test(h));
+  const rollColIdx = header.findIndex(h => /roll\s*no\.?/i.test(h) || /^roll$/i.test(h));
+
+  if (rollColIdx === -1) {
+    showToast('❌', 'Sheet must have a "Roll No." column so students can be matched.');
+    return;
+  }
+
+  // Columns after Name/Roll No. are mark categories
+  const markColIndices = header
+    .map((h, i) => ({ h, i }))
+    .filter(({ i }) => i !== nameColIdx && i !== rollColIdx && header[i].trim() !== '');
+
+  if (!markColIndices.length) {
+    showToast('⚠️', 'No mark columns found after Name / Roll No. columns.');
+    return;
+  }
+
+  // Build a roll-number → student lookup for fast matching
+  const rollToStudent = {};
+  allStudents.forEach(s => { rollToStudent[s.roll_no.trim().toLowerCase()] = s; });
+
+  // ── Step 1: create any missing mark_categories ──
+  showToast('🔄', 'Importing columns…');
+  for (const { h: colName } of markColIndices) {
+    const name  = colName.trim();
+    // Try to detect a total from the header, e.g. "Quiz 1 /20" or "Quiz 1 (20)"
+    const totalMatch = name.match(/[\/\(]\s*(\d+(?:\.\d+)?)\s*\)?$/);
+    const cleanName  = totalMatch ? name.slice(0, totalMatch.index).trim() : name;
+    const total      = totalMatch ? parseFloat(totalMatch[1]) : 20;
+
+    if (!marksColumns.some(c => c.name.toLowerCase() === cleanName.toLowerCase())) {
+      const { data, error } = await sb.from('mark_categories').insert({
+        ta_id:    currentTA.id,
+        class_id: currentClass.id,
+        name:     cleanName,
+        total,
+      }).select().single();
+      if (error) { showToast('❌', `Failed to create column "${cleanName}": ` + error.message); return; }
+      marksColumns.push({ id: data.id, name: data.name, total: data.total });
+      marksLookup[data.id] = {};
+    }
+  }
+
+  // ── Step 2: upsert marks for each data row ──
+  let imported = 0, skipped = 0;
+  for (let r = 1; r < rows.length; r++) {
+    const row  = rows[r];
+    const roll = String(row[rollColIdx] ?? '').trim().toLowerCase();
+    if (!roll) continue;
+
+    const student = rollToStudent[roll];
+    if (!student) { skipped++; continue; }
+
+    for (const { h: colName, i: colIdx } of markColIndices) {
+      const rawName    = colName.trim();
+      const totalMatch = rawName.match(/[\/\(]\s*(\d+(?:\.\d+)?)\s*\)?$/);
+      const cleanName  = totalMatch ? rawName.slice(0, totalMatch.index).trim() : rawName;
+
+      const col = marksColumns.find(c => c.name.toLowerCase() === cleanName.toLowerCase());
+      if (!col) continue;
+
+      const rawVal = row[colIdx];
+      const val    = rawVal === '' || rawVal === null || rawVal === undefined
+        ? null
+        : parseFloat(rawVal);
+
+      if (val === null || isNaN(val)) continue;
+
+      const { error } = await sb.from('marks').upsert({
+        student_id:  student.id,
+        ta_id:       currentTA.id,
+        category_id: col.id,
+        subject:     col.name,
+        marks:       val,
+        total:       col.total,
+      }, { onConflict: 'student_id,category_id,subject' });
+
+      if (!error) {
+        if (!marksLookup[col.id]) marksLookup[col.id] = {};
+        marksLookup[col.id][student.id] = { marks: val, remarks: null };
+        imported++;
+      }
+    }
+  }
+
+  renderGradebook();
+  updateOverviewStats();
+  const msg = `Imported ${imported} mark(s).` + (skipped ? ` ${skipped} row(s) skipped (roll no. not found).` : '');
+  showToast('✅', msg);
+}
+
+// ── EXCEL EXPORT ──
+// Downloads a full gradebook as an .xlsx file:
+//   Name | Roll No. | [Column 1] | [Column 2] | …
+// All mark categories are included. Empty cells are left blank.
+function exportToExcel() {
+  if (!currentClass) { showToast('⚠️', 'Select a class first.'); return; }
+  if (!marksColumns.length) { showToast('⚠️', 'No mark columns to export yet.'); return; }
+
+  const approved = allStudents.filter(s => s.status === 'approved');
+  if (!approved.length) { showToast('⚠️', 'No approved students to export.'); return; }
+
+  // Build header row: Name, Roll No., then each column "Name /Total"
+  const header = ['Name', 'Roll No.', ...marksColumns.map(c => `${c.name} /${c.total}`)];
+
+  // Build data rows
+  const dataRows = approved.map(s => {
+    const row = [s.name, s.roll_no];
+    marksColumns.forEach(col => {
+      const cell = marksLookup[col.id]?.[s.id];
+      row.push(cell?.marks ?? '');
+    });
+    return row;
+  });
+
+  // Assemble sheet
+  const wsData = [header, ...dataRows];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Style column widths
+  ws['!cols'] = [
+    { wch: 24 },  // Name
+    { wch: 14 },  // Roll No.
+    ...marksColumns.map(() => ({ wch: 14 })),
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Gradebook');
+
+  const className = (currentClass.name || 'Gradebook').replace(/[\\\/\?\*\[\]]/g, '_');
+  XLSX.writeFile(wb, `${className}_marks.xlsx`);
+  showToast('✅', 'Excel file downloaded!');
 }
 
 // ── OVERVIEW STATS ──
