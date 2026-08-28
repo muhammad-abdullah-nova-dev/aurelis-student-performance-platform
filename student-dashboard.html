@@ -323,6 +323,9 @@
       .sidebar.open { transform:translateX(0); }
       .main { margin-left:0; padding:20px 16px; max-width: 100vw; }
       .stats-row { grid-template-columns:1fr; gap:12px; }
+      .stat-card { padding: 16px 14px; }
+      .stat-label { font-size: 0.68rem; line-height: 1.3; }
+      .stat-value { font-size: 1.8rem; }
       .mob-toggle { 
         display:flex;
         position: fixed;
@@ -339,6 +342,42 @@
         cursor: pointer;
         box-shadow: var(--shadow-md);
       }
+      
+      /* Page Title */
+      .page-title { font-size: 1.4rem; }
+      .page-sub { font-size: 0.82rem; }
+      
+      /* Cards */
+      .card { margin-bottom: 16px; }
+      .card-header { padding: 14px 18px; }
+      .card-body { padding: 18px; }
+      .card-title { font-size: 0.95rem; }
+      
+      /* Tables */
+      table { font-size: 0.85rem; }
+      th { padding: 10px 8px; font-size: 0.72rem; }
+      td { padding: 12px 8px; }
+      
+      .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+    
+    @media(max-width:600px) {
+      .main { padding: 16px 12px; }
+      .stats-row { gap: 10px; }
+      .stat-card { padding: 14px 12px; }
+      .stat-label { font-size: 0.65rem; }
+      .stat-value { font-size: 1.6rem; }
+      
+      .page-title { font-size: 1.25rem; }
+      
+      .card-body { padding: 16px; }
+      
+      table { font-size: 0.8rem; }
+      th { padding: 8px 6px; font-size: 0.68rem; }
+      td { padding: 10px 6px; }
     }
 
     .overlay { display:none; position:fixed; inset:0; background:rgba(30,26,23,0.45); z-index:40; }

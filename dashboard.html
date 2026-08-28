@@ -678,10 +678,12 @@
       .page-sub { font-size: 0.8rem; margin-top: 3px; }
       
       /* Stats Row */
-      .stats-row { grid-template-columns:1fr 1fr; gap:12px; margin-bottom: 20px; }
-      .stat-card { padding: 16px 18px; }
-      .stat-label { font-size: 0.7rem; }
-      .stat-value { font-size: 1.6rem; }
+      .stats-row { grid-template-columns:1fr 1fr; gap:10px; margin-bottom: 20px; }
+      .stat-card { padding: 14px 12px; }
+      .stat-icon { margin-bottom: 8px; font-size: 1rem; }
+      .stat-num { font-size: 1.5rem; margin-bottom: 4px; }
+      .stat-lbl { font-size: 0.65rem; line-height: 1.3; word-wrap: break-word; }
+      .stat-card::after { height: 3px; }
       
       /* Mobile Toggle */
       .mob-toggle { display:flex; }
@@ -753,7 +755,9 @@
     @media(max-width:600px) {
       /* Even Smaller Screens */
       .stats-row { grid-template-columns: 1fr; gap:10px; }
-      .stat-card { padding: 14px 16px; }
+      .stat-card { padding: 16px 14px; }
+      .stat-num { font-size: 1.8rem; }
+      .stat-lbl { font-size: 0.7rem; }
       
       .topbar-right { gap: 6px; }
       
@@ -772,8 +776,12 @@
     
     @media(max-width:400px) {
       /* Very Small Screens */
-      .main { padding: 16px 12px; }
+      .main { padding: 16px 12px; max-width: 100vw; }
       .card { padding: 16px 12px; }
+      
+      .stat-card { padding: 12px 10px; }
+      .stat-num { font-size: 1.6rem; }
+      .stat-lbl { font-size: 0.62rem; }
       
       .table-wrapper { 
         margin: 0 -12px;
