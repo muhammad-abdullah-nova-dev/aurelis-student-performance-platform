@@ -1958,7 +1958,7 @@ function updateOverviewStats() {
   document.getElementById('ov-total').textContent    = total;
   document.getElementById('ov-approved').textContent = approved;
   document.getElementById('ov-pending').textContent  = pending;
-  document.getElementById('ov-marks').textContent    = '—';
+  document.getElementById('ov-marks').textContent    = Object.values(marksLookup).reduce((total, catObj) => total + Object.values(catObj).filter(v => v.marks !== null && v.marks !== undefined).length, 0);
 
   // Overview link box
   const ovLinkBox = document.getElementById('ov-link-box');
