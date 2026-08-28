@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -6,6 +6,7 @@
   <title>Aurelis — Student Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     :root {
       --brand-primary:        #3E7A54;
@@ -285,7 +286,7 @@
   </style>
 </head>
 <body>
-  <div class="mob-toggle" id="mob-toggle">☰</div>
+  <div class="mob-toggle" id="mob-toggle"><i data-lucide="menu" style="width:20px;height:20px;"></i></div>
   <div class="overlay" id="overlay"></div>
 
   <aside class="sidebar" id="sidebar">
@@ -299,23 +300,23 @@
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" data-section="overview">
-        <span class="nav-icon">📊</span><span>Overview</span>
+        <i data-lucide="bar-chart-3" class="nav-icon"></i><span>Overview</span>
       </div>
       <div class="nav-item" data-section="classes">
-        <span class="nav-icon">📚</span><span>My Classes</span>
+        <i data-lucide="book-open" class="nav-icon"></i><span>My Classes</span>
       </div>
       <div class="nav-item" data-section="marks">
-        <span class="nav-icon">📝</span><span>All Marks</span>
+        <i data-lucide="clipboard-check" class="nav-icon"></i><span>All Marks</span>
       </div>
       <div class="nav-item" data-section="queries">
-        <span class="nav-icon">💬</span><span>My Queries</span>
+        <i data-lucide="message-circle" class="nav-icon"></i><span>My Queries</span>
       </div>
       <div class="nav-item" data-section="profile">
-        <span class="nav-icon">👤</span><span>Profile</span>
+        <i data-lucide="user" class="nav-icon"></i><span>Profile</span>
       </div>
     </nav>
     <button class="logout-btn" onclick="handleLogout()">
-      <span>🚪</span><span>Logout</span>
+      <i data-lucide="log-out" style="width:18px;height:18px;"></i><span>Logout</span>
     </button>
   </aside>
 
@@ -424,7 +425,7 @@
     <div class="modal">
       <div class="modal-header">
         <div class="modal-title">Raise a Query</div>
-        <button class="modal-close" onclick="closeQueryModal()">×</button>
+        <button class="modal-close" onclick="closeQueryModal()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
       </div>
       <div class="modal-body">
         <div class="form-field">
@@ -530,7 +531,7 @@
       await loadMarks();          // loads allMarks, then paints overview + marks section
       renderClasses();
       renderOverview();
-      renderAllMarks();
+      renderAllMarks();`n      lucide.createIcons();
     }
 
     // ── Load marks + category names ────────────────────────
@@ -582,7 +583,7 @@
       const recent = allMarks.slice(0, 5);
 
       if (recent.length === 0) {
-        el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No marks yet</p></div>';
+        el.innerHTML = '<div class="empty-state"><i data-lucide="clipboard" style="width:48px;height:48px;margin:0 auto 16px;opacity:0.4;"></i><p>No marks yet</p></div>';
         return;
       }
 
@@ -638,7 +639,7 @@
       const el = document.getElementById('marks-content');
 
       if (allMarks.length === 0) {
-        el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No marks available yet</p></div>';
+        el.innerHTML = '<div class="empty-state"><i data-lucide="clipboard" style="width:48px;height:48px;margin:0 auto 16px;opacity:0.4;"></i><p>No marks available yet</p></div>';
         return;
       }
 
@@ -655,7 +656,7 @@
             <td>${pct !== null ? pct + '%' : '—'}</td>
             <td><span class="badge ${status}">${label}</span></td>
             <td>${m.marks !== null
-              ? `<button class="query-btn" data-cat-id="${m.category_id}" data-cat-name="${esc(m.categoryName)}">Raise Query</button>`
+              ? `<button class="query-btn" data-cat-id="${m.category_id}" data-cat-name="${esc(m.categoryName)}"><i data-lucide="message-square" style="width:14px;height:14px;margin-right:4px;"></i>Raise Query</button>`
               : '—'}</td>
           </tr>`;
       }).join('');
@@ -698,13 +699,13 @@
         .order('created_at', { ascending: false });
 
       if (error) {
-        el.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Could not load queries</p></div>';
+        el.innerHTML = '<div class="empty-state"><i data-lucide="alert-circle" style="width:48px;height:48px;margin:0 auto 16px;opacity:0.4;"></i><p>Could not load queries</p></div>';
         console.error('Queries fetch error:', error);
         return;
       }
 
       if (!queries || queries.length === 0) {
-        el.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><p>No queries submitted yet.<br>Go to <strong>All Marks</strong> to raise one.</p></div>';
+        el.innerHTML = '<div class="empty-state"><i data-lucide="message-circle" style="width:48px;height:48px;margin:0 auto 16px;opacity:0.4;"></i><p>No queries submitted yet.<br>Go to <strong>All Marks</strong> to raise one.</p></div>';
         return;
       }
 

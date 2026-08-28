@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -6,6 +6,7 @@
   <title>Aurelis — Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     /* ── DESIGN TOKENS ── */
     :root {
@@ -888,7 +889,7 @@
       Need help?<br/>
       📧 <a href="mailto:muhammed.abdullah.coder@gmail.com" style="color:var(--brand-primary);text-decoration:none;">Email</a>
       &nbsp;·&nbsp;
-      💬 <a href="https://wa.me/923226334814" target="_blank" style="color:var(--brand-primary);text-decoration:none;">WhatsApp</a>
+      <i data-lucide="message-square" style="width:18px;height:18px;"></i> <a href="https://wa.me/923226334814" target="_blank" style="color:var(--brand-primary);text-decoration:none;">WhatsApp</a>
     </div>
   </div>
 </aside>
@@ -1539,7 +1540,7 @@ async function loadQueries() {
         </div>
         <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="toggleReplyForm('${q.id}')">✏️ Edit Reply</button>
       ` : `
-        <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="toggleReplyForm('${q.id}')">💬 Reply to Student</button>
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="toggleReplyForm('${q.id}')"><i data-lucide="message-square" style="width:18px;height:18px;"></i> Reply to Student</button>
       `}
       <div id="reply-form-${q.id}" style="display:none;margin-top:10px;">
         <textarea id="reply-text-${q.id}" rows="2" placeholder="Write your reply..." style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-size:0.87rem;color:var(--text-primary);resize:vertical;">${q.reply || ''}</textarea>

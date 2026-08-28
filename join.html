@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -6,6 +6,7 @@
   <title>Aurelis — Join Class</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     /* ── DESIGN TOKENS ── */
     :root {
@@ -393,28 +394,28 @@
         <div class="field">
           <label>Full Name</label>
           <div class="input-wrap">
-            <span class="ico">👤</span>
+            <i data-lucide="user" class="ico" style="width:16px;height:16px;"></i>
             <input type="text" id="s-name" placeholder="e.g. Your Name"/>
           </div>
         </div>
         <div class="field">
           <label>Roll Number</label>
           <div class="input-wrap">
-            <span class="ico">🎫</span>
+            <i data-lucide="ticket" class="ico" style="width:16px;height:16px;"></i>
             <input type="text" id="s-roll" placeholder="e.g. 25F-xxxx"/>
           </div>
         </div>
         <div class="field">
           <label>Email Address</label>
           <div class="input-wrap">
-            <span class="ico">✉️</span>
+            <i data-lucide="mail" class="ico" style="width:16px;height:16px;"></i>
             <input type="email" id="s-email" placeholder="your@email.com" required/>
           </div>
         </div>
         <div class="field">
           <label>Password <span style="color:var(--text-muted);font-size:0.78rem">(min. 6 characters)</span></label>
           <div class="input-wrap">
-            <span class="ico">🔒</span>
+            <i data-lucide="lock" class="ico" style="width:16px;height:16px;"></i>
             <input type="password" id="s-password" placeholder="Create a password" required/>
           </div>
         </div>
