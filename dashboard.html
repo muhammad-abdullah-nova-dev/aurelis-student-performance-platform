@@ -1675,6 +1675,36 @@ async function renameColumn(categoryId) {
   showToast('✅', 'Column updated.');
 }
 
+async function deleteColumn(categoryId) {
+  const col = marksColumns.find(c => c.id === categoryId);
+  if (!col) return;
+
+  const confirmed = confirm(`Delete column "${col.name}"?\n\nThis will permanently remove all marks entered under this column. This cannot be undone.`);
+  if (!confirmed) return;
+
+  // Delete all marks for this category first, then the category itself
+  const { error: marksErr } = await sb.from('marks').delete().eq('category_id', categoryId);
+  if (marksErr) { showToast('❌', 'Failed to delete marks: ' + marksErr.message); return; }
+
+  const { error: catErr } = await sb.from('mark_categories').delete().eq('id', categoryId);
+  if (catErr) { showToast('❌', 'Failed to delete column: ' + catErr.message); return; }
+
+  // Remove from local state
+  marksColumns = marksColumns.filter(c => c.id !== categoryId);
+  delete marksLookup[categoryId];
+
+  // If the deleted column was active, switch to the first remaining one
+  if (activeColumnId === categoryId) {
+    activeColumnId = marksColumns[0]?.id || null;
+    if (activeColumnId) localStorage.setItem(activeColumnStorageKey(), activeColumnId);
+    else localStorage.removeItem(activeColumnStorageKey());
+  }
+
+  renderGradebook();
+  updateOverviewStats();
+  showToast('✅', `Column "${col.name}" deleted.`);
+}
+
 let activeColumnId = null;
 function activeColumnStorageKey() { return `ta_gradebook_column_${currentClass?.id}`; }
 
@@ -1706,6 +1736,9 @@ function renderGradebook() {
           <span class="side-list-item${c.id===activeColumnId?' active-pill':''}">
             <span onclick="switchGradebookColumn('${c.id}')" style="cursor:pointer;">${c.name}</span>
             <span onclick="renameColumn('${c.id}')" title="Rename" style="cursor:pointer;margin-left:6px;opacity:0.7;">✏️</span>
+            <span onclick="deleteColumn('${c.id}')" title="Delete column" style="cursor:pointer;margin-left:4px;opacity:0.6;color:var(--danger);">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </span>
           </span>`).join('')
       : `<span style="font-size:0.78rem;color:var(--text-muted);">No columns yet</span>`);
   sideList.innerHTML = listHtml;
