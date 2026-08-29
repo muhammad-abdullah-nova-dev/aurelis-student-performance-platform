@@ -1061,6 +1061,9 @@
       <button class="btn btn-ghost  btn-sm" onclick="filterStudents('pending')" id="f-pending"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pending</button>
       <button class="btn btn-ghost  btn-sm" onclick="filterStudents('approved')"id="f-approved"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Approved</button>
       <button class="btn btn-ghost  btn-sm" onclick="filterStudents('rejected')"id="f-rejected"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Rejected</button>
+      <button class="btn btn-success btn-sm" id="approve-all-btn" onclick="approveAllPending()" style="display:none;">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Approve All Pending (<span id="approve-all-count">0</span>)
+      </button>
       <input class="form-input" id="student-search" placeholder="🔍 Search by name or roll no..." style="flex:1;min-width:180px;margin-left:auto" oninput="filterStudents(currentFilter)"/>
     </div>
 
@@ -2355,6 +2358,16 @@ function filterStudents(f) {
       s.name.toLowerCase().includes(q) || s.roll_no.toLowerCase().includes(q)
     );
   }
+
+  // Show "Approve All Pending" button only when there are pending students
+  const pendingCount = allStudents.filter(s => s.status === 'pending').length;
+  const approveBtn   = document.getElementById('approve-all-btn');
+  const approveCount = document.getElementById('approve-all-count');
+  if (approveBtn) {
+    approveBtn.style.display = pendingCount > 0 ? '' : 'none';
+    if (approveCount) approveCount.textContent = pendingCount;
+  }
+
   renderStudents(filtered);
 }
 
@@ -2393,6 +2406,25 @@ async function updateStudent(id, status) {
   const { error } = await sb.from('students').update({ status }).eq('id', id);
   if (error) { showToast('❌', 'Failed to update student.'); return; }
   showToast('✅', `Student ${status}!`);
+  await loadStudents();
+  updateOverviewStats();
+}
+
+async function approveAllPending() {
+  const pending = allStudents.filter(s => s.status === 'pending');
+  if (!pending.length) { showToast('⚠️', 'No pending students to approve.'); return; }
+
+  const confirmed = await showConfirm(
+    `This will approve all ${pending.length} pending student(s) at once.`,
+    { title: `Approve ${pending.length} students?`, confirmLabel: 'Approve All', cancelLabel: 'Cancel' }
+  );
+  if (!confirmed) return;
+
+  const ids = pending.map(s => s.id);
+  const { error } = await sb.from('students').update({ status: 'approved' }).in('id', ids);
+  if (error) { showToast('❌', 'Bulk approve failed: ' + error.message); return; }
+
+  showToast('✅', `${pending.length} student(s) approved!`);
   await loadStudents();
   updateOverviewStats();
 }
